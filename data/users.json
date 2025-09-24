@@ -1,0 +1,18 @@
+{
+  "users": [
+    {
+      "id": "68c9193ae783f3896fd7437d",
+      "email": "31vishal2004@gmail.com",
+      "name": "Vishal Mishra",
+      "enrolledCourse": true,
+      "progress": 0
+    },
+    {
+      "id": "68c91b5ae783f3896fd74381",
+      "email": "12vishal0@gmail.com",
+      "name": "Vishal Mishra",
+      "enrolledCourse": true,
+      "progress": 0
+    }
+  ]
+}

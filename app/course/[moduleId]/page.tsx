@@ -117,7 +117,15 @@ export default function ModulePage() {
   }, [user, router])
 
   if (!mounted || !user) {
-    return <div className="min-h-screen flex items-center justify-center pt-20 lg:pt-24">Loading...</div>
+    return (
+      <div className="min-h-screen flex items-center justify-center pt-20 lg:pt-24 bg-gradient-to-br from-background to-muted">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <h2 className="text-xl font-semibold text-foreground mb-2">Loading Course Module</h2>
+          <p className="text-muted-foreground">Preparing your learning content...</p>
+        </div>
+      </div>
+    )
   }
 
   const module = moduleContent[moduleId as keyof typeof moduleContent]

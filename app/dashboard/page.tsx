@@ -67,7 +67,7 @@ export default function DashboardPage() {
       <div className="min-h-screen flex items-center justify-center p-4 pt-20 lg:pt-24">
         <div className="text-center">
           <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-sm text-muted-foreground">Loading...</p>
+          <p className="text-sm text-muted-foreground">Loading your dashboard...</p>
         </div>
       </div>
     )

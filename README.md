@@ -65,19 +65,19 @@
    JWT_SECRET=your_long_random_secret_key_here
    
    # Razorpay Configuration
-   NEXT_PUBLIC_RAZORPAY_KEY_ID=rzp_test_xxxxxxxxxxxx
-   RAZORPAY_KEY_ID=rzp_test_xxxxxxxxxxxx
+NEXT_PUBLIC_RAZORPAY_KEY_ID=rzp_test_xxxxxxxxxxxx
+RAZORPAY_KEY_ID=rzp_test_xxxxxxxxxxxx
    RAZORPAY_KEY_SECRET=your_razorpay_key_secret
-   
+
    # reCAPTCHA Configuration
-   NEXT_PUBLIC_RECAPTCHA_SITE_KEY=your-recaptcha-site-key
-   RECAPTCHA_SECRET_KEY=your-recaptcha-secret-key
-   
+NEXT_PUBLIC_RECAPTCHA_SITE_KEY=your-recaptcha-site-key
+RECAPTCHA_SECRET_KEY=your-recaptcha-secret-key
+
    # Admin Configuration
-   ADMIN_NAME=Admin User
+ADMIN_NAME=Admin User
    ADMIN_EMAIL=admin@placementpulse.com
-   ADMIN_PASSWORD=your_secure_admin_password
-   ADMIN_ROLE=admin
+ADMIN_PASSWORD=your_secure_admin_password
+ADMIN_ROLE=admin
    
    # App Configuration
    NEXT_PUBLIC_BASE_URL=http://localhost:3000

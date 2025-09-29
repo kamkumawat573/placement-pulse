@@ -1,6 +1,8 @@
 import { connectToDatabase } from "@/lib/mongodb"
 import { BlogModel } from "@/lib/models/Blog"
 
+export const dynamic = 'force-dynamic'
+
 export async function GET() {
   await connectToDatabase()
   const blogs = await BlogModel.find({ 

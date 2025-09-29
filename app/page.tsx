@@ -8,14 +8,12 @@ import { Card, CardContent } from "@/components/ui/card"
 import { ArrowRight, Play, Clock, Users, Award, Star, CheckCircle, Youtube, Instagram, Twitter, Linkedin } from "lucide-react"
 import Link from "next/link"
 import { useAuth } from "@/contexts/auth-context"
-import { LoadingSpinner } from "@/components/ui/loading-spinner"
 
 export default function HomePage() {
   const heroRef = useRef<HTMLDivElement>(null)
   const videoSectionRef = useRef<HTMLElement>(null)
   const authContext = useAuth()
   const user = authContext?.user || null
-  const [isLoading, setIsLoading] = useState(true)
   const [notifications, setNotifications] = useState<Array<{
     id: string;
     type: string;
@@ -178,49 +176,11 @@ export default function HomePage() {
             }
           }
           
-          await Promise.all([
-            loadNotifications(),
-            loadVideos(),
-            loadSettings(),
-            loadCourse()
-          ])
-          setIsLoading(false)
+          loadNotifications()
+          loadVideos()
+          loadSettings()
+          loadCourse()
         }, [])
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-blue-950/20 dark:via-background dark:to-purple-950/20 flex items-center justify-center">
-        <div className="text-center max-w-md mx-auto px-6">
-          {/* Logo/Icon */}
-          <div className="mb-8">
-            <div className="w-20 h-20 mx-auto mb-4 relative">
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full animate-pulse"></div>
-              <div className="absolute inset-2 bg-white dark:bg-gray-900 rounded-full flex items-center justify-center">
-                <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                  PP
-                </span>
-              </div>
-            </div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-              Placement Pulse
-            </h1>
-            <p className="text-gray-600 dark:text-gray-400 text-sm">
-              MBA Placement Preparation Platform
-            </p>
-          </div>
-
-          {/* Loading Animation */}
-          <div className="flex justify-center space-x-1 mb-6">
-            <LoadingSpinner size="lg" />
-          </div>
-
-          <div className="text-sm text-gray-600 dark:text-gray-400">
-            Loading your MBA placement journey...
-          </div>
-        </div>
-      </div>
-    )
-  }
 
   return (
     <div className="min-h-screen">

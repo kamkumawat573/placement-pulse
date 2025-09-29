@@ -8,7 +8,6 @@ import { AuthProviderWrapper } from "@/components/auth-provider-wrapper"
 import { WhatsAppFloat } from "@/components/whatsapp-float"
 import { Navigation } from "@/components/navigation"
 import { Suspense } from "react"
-import { LoadingSpinner } from "@/components/ui/loading-spinner"
 
 export const metadata: Metadata = {
   title: "Placement Pulse - MBA Placement Preparation",
@@ -27,14 +26,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`font-sans ${GeistSans.variable} ${GeistMono.variable}`}>
-        <Suspense fallback={
-          <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-950/20 dark:to-purple-950/20">
-            <div className="text-center">
-              <LoadingSpinner size="lg" className="mb-4" />
-              <p className="text-gray-600 dark:text-gray-400">Loading Placement Pulse...</p>
-            </div>
-          </div>
-        }>
+        <Suspense fallback={<div>Loading...</div>}>
           <AuthProviderWrapper>
             <Navigation />
             {children}

@@ -3,6 +3,8 @@ import { connectToDatabase } from '@/lib/mongodb';
 import { AnnouncementModel } from '@/lib/models/Announcement';
 import { verifyUser } from '@/lib/user-auth';
 
+export const dynamic = 'force-dynamic'
+
 export async function GET(request: NextRequest) {
   try {
     await connectToDatabase();

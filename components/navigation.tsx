@@ -337,7 +337,7 @@ export function Navigation() {
                   Sign In
                 </Button>
               </Link>
-              <Link href="/enroll">
+              <Link href="/auth?mode=signup">
                     <Button 
                       size="sm" 
                       className="bg-gradient-to-r from-primary to-primary/80 hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl hover:shadow-primary/25"
@@ -562,7 +562,7 @@ export function Navigation() {
                         Sign In
                       </Button>
                     </Link>
-                    <Link href="/enroll" onClick={() => setMobileMenuOpen(false)}>
+                    <Link href="/auth?mode=signup" onClick={() => setMobileMenuOpen(false)}>
                       <Button 
                         size="lg" 
                         className="w-full h-12 bg-gradient-to-r from-primary to-primary/80 shadow-lg"

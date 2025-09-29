@@ -32,9 +32,18 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined)
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
+    setMounted(true)
+    
     const initializeAuth = async () => {
+      // Check if we're in browser environment
+      if (typeof window === 'undefined') {
+        setLoading(false)
+        return
+      }
+
       // First, try to get user from localStorage for instant UI
       const cachedUser = localStorage.getItem("user")
       if (cachedUser) {
@@ -88,7 +97,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (!res.ok) return false
       const userData = await res.json()
       setUser(userData)
-      localStorage.setItem("user", JSON.stringify(userData))
+      if (typeof window !== 'undefined') {
+        localStorage.setItem("user", JSON.stringify(userData))
+      }
       return true
     } catch {
       return false
@@ -121,7 +132,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
       const userData = await res.json()
       setUser(userData)
-      localStorage.setItem("user", JSON.stringify(userData))
+      if (typeof window !== 'undefined') {
+        localStorage.setItem("user", JSON.stringify(userData))
+      }
       return { success: true }
     } catch {
       return { success: false, error: "Network error" }
@@ -135,8 +148,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       await fetch("/api/auth/logout", { method: "POST" })
     } finally {
       setUser(null)
-      localStorage.removeItem("user")
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem("user")
+      }
     }
+  }
+
+  // Prevent hydration mismatch by not rendering until mounted
+  if (!mounted) {
+    return <AuthContext.Provider value={{ user: null, login, signup, logout, loading: true }}>{children}</AuthContext.Provider>
   }
 
   return <AuthContext.Provider value={{ user, login, signup, logout, loading }}>{children}</AuthContext.Provider>
@@ -145,7 +165,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 export function useAuth() {
   const context = useContext(AuthContext)
   if (context === undefined) {
-    throw new Error("useAuth must be used within an AuthProvider")
+    // Return a default context during SSR or when not in AuthProvider
+    return {
+      user: null,
+      login: async () => false,
+      signup: async () => ({ success: false, error: 'Not available' }),
+      logout: async () => {},
+      loading: true
+    }
   }
   return context
 }

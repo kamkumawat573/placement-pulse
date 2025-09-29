@@ -1,137 +1,257 @@
-# Placement Pulse - MBA Placement Preparation Website
+# 🎯 Placement Pulse - MBA Placement Preparation Platform
 
-*Master your MBA placements and internships with expert guidance, mock interviews, and placement strategy from MBA alumni*
+[![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=for-the-badge&logo=vercel)](https://placement-pulse.vercel.app)
+[![Built with Next.js](https://img.shields.io/badge/Built%20with-Next.js-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![MongoDB](https://img.shields.io/badge/MongoDB-4EA94B?style=for-the-badge&logo=mongodb&logoColor=white)](https://www.mongodb.com/)
 
-[![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=for-the-badge&logo=vercel)](https://vercel.com/vishal-mishras-projects-3b9179fb/v0-scrolling-animation-website)
-[![Built with v0](https://img.shields.io/badge/Built%20with-v0.app-black?style=for-the-badge)](https://v0.app/chat/projects/c4Xeuk8qEE3)
+> **Master your MBA placements and internships with expert guidance, mock interviews, and placement strategy from MBA alumni**
 
-## Overview
+## 🌟 Features
 
-This repository will stay in sync with your deployed chats on [v0.app](https://v0.app).
-Any changes you make to your deployed app will be automatically pushed to this repository from [v0.app](https://v0.app).
+### 🎓 For Students
+- **Live GD Practice** - Real-time Group Discussions with alumni moderators
+- **Mock Interviews** - HR & technical interviews with detailed feedback
+- **Resume & LinkedIn Review** - Expert reviews to make profiles recruiter-ready
+- **Placement Strategy Sessions** - Step-by-step guidance for aptitude tests and company shortlisting
+- **Peer-to-Peer Learning** - Collaborate with fellow MBA students
+- **Weekly Blogs & Hacks** - Stay updated with placement trends and success stories
 
-## Backend additions (Razorpay Test Mode + Admin Panel)
+### 👨‍💼 For Admins
+- **Comprehensive Dashboard** - Platform statistics and analytics
+- **Student Management** - View, edit, and manage student profiles
+- **Course Management** - Dynamic course content and pricing
+- **Content Management** - Blogs, testimonials, and announcements
+- **Analytics** - Performance metrics and insights
 
-This project now includes API routes to handle course enrollment with Razorpay in test mode, user authentication with MongoDB, and a comprehensive admin panel.
+## 🚀 Tech Stack
 
-### Environment variables
+- **Frontend**: Next.js 14, React 18, TypeScript
+- **Styling**: Tailwind CSS, Radix UI
+- **Backend**: Next.js API Routes, MongoDB, Mongoose
+- **Authentication**: JWT, bcryptjs
+- **Payments**: Razorpay Integration
+- **Security**: reCAPTCHA, Input validation
+- **Deployment**: Vercel
 
-Create a `.env.local` file in the project root with:
+## 📋 Prerequisites
 
+- Node.js 18+ 
+- MongoDB Atlas account
+- Razorpay account (for payments)
+- Google reCAPTCHA account (for security)
+
+## 🛠️ Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/vishal-mishra/placement-pulse.git
+   cd placement-pulse
+   ```
+
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
+
+3. **Environment Setup**
+   
+   Create a `.env.local` file in the project root:
+   ```env
+   # Database
+   MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/placement-pulse
+   
+   # JWT Secret
+   JWT_SECRET=your_long_random_secret_key_here
+   
+   # Razorpay Configuration
+   NEXT_PUBLIC_RAZORPAY_KEY_ID=rzp_test_xxxxxxxxxxxx
+   RAZORPAY_KEY_ID=rzp_test_xxxxxxxxxxxx
+   RAZORPAY_KEY_SECRET=your_razorpay_key_secret
+   
+   # reCAPTCHA Configuration
+   NEXT_PUBLIC_RECAPTCHA_SITE_KEY=your-recaptcha-site-key
+   RECAPTCHA_SECRET_KEY=your-recaptcha-secret-key
+   
+   # Admin Configuration
+   ADMIN_NAME=Admin User
+   ADMIN_EMAIL=admin@placementpulse.com
+   ADMIN_PASSWORD=your_secure_admin_password
+   ADMIN_ROLE=admin
+   
+   # App Configuration
+   NEXT_PUBLIC_BASE_URL=http://localhost:3000
+   ```
+
+4. **Setup Admin User**
+   ```bash
+   npm run setup-admin
+   ```
+
+5. **Seed Sample Data (Optional)**
+   ```bash
+   npm run seed-data
+   ```
+
+6. **Start Development Server**
+   ```bash
+   npm run dev
+   ```
+
+## 🌐 Access Points
+
+- **Home**: `http://localhost:3000`
+- **Student Auth**: `http://localhost:3000/auth`
+- **Admin Panel**: `http://localhost:3000/admin`
+- **Course Enrollment**: `http://localhost:3000/enroll`
+- **Student Dashboard**: `http://localhost:3000/dashboard`
+
+## 📱 Responsive Design
+
+The platform is fully responsive and optimized for:
+- 📱 Mobile devices (320px+)
+- 📱 Small tablets (475px+)
+- 💻 Tablets (640px+)
+- 🖥️ Desktop (1024px+)
+- 🖥️ Large screens (1280px+)
+
+## 🔐 Authentication Flow
+
+### Student Authentication
+1. **Signup**: Email, password, mobile number
+2. **Login**: Email and password
+3. **Auto-redirect**: 
+   - Enrolled users → Dashboard
+   - Non-enrolled users → Enrollment page
+
+### Admin Authentication
+1. **Login**: Admin credentials
+2. **Auto-detection**: System detects admin role
+3. **Redirect**: Admin panel access
+
+## 💳 Payment Integration
+
+- **Razorpay Integration**: Secure payment processing
+- **Test Mode**: Safe testing environment
+- **Payment Verification**: Server-side verification
+- **Transaction Tracking**: Complete payment history
+
+## 🗄️ Database Models
+
+### User Model
+```typescript
+{
+  name: string
+  email: string
+  mobile: string
+  password: string (hashed)
+  enrolledCourse: boolean
+  progress: number
+  transactionId: string
+  role: 'user'
+}
 ```
-NEXT_PUBLIC_RAZORPAY_KEY_ID=rzp_test_xxxxxxxxxxxx
-RAZORPAY_KEY_ID=rzp_test_xxxxxxxxxxxx
-RAZORPAY_KEY_SECRET=your_test_key_secret
-MONGODB_URI=mongodb+srv://user:pass@cluster0.example.mongodb.net/learnpro
-JWT_SECRET=your_long_random_secret
 
-# reCAPTCHA Configuration (get from https://www.google.com/recaptcha/admin)
-NEXT_PUBLIC_RECAPTCHA_SITE_KEY=your-recaptcha-site-key
-RECAPTCHA_SECRET_KEY=your-recaptcha-secret-key
-
-# Admin credentials (required for admin panel)
-ADMIN_NAME=Admin User
-ADMIN_EMAIL=admin@example.com
-ADMIN_PASSWORD=your_secure_admin_password
-ADMIN_ROLE=admin
+### Admin Model
+```typescript
+{
+  name: string
+  email: string
+  password: string (hashed)
+  role: 'admin' | 'super-admin'
+  isActive: boolean
+  lastLogin: Date
+}
 ```
 
-Notes:
-- `NEXT_PUBLIC_RAZORPAY_KEY_ID` is exposed to the browser to initialize Checkout.
-- Keep `RAZORPAY_KEY_SECRET` server-only.
-- `NEXT_PUBLIC_RECAPTCHA_SITE_KEY` is exposed to the browser for reCAPTCHA widget.
-- Keep `RECAPTCHA_SECRET_KEY` server-only for verification.
-- Admin credentials are used to create the first admin user in the database.
-
-### Install dependencies
-
-```
-npm i
-```
-
-Razorpay SDK, MongoDB, and authentication dependencies are already added.
-
-### Setup Admin User
-
-After setting up your environment variables, create the admin user:
-
-```
-npm run setup-admin
+### Payment Model
+```typescript
+{
+  userId: ObjectId
+  razorpayOrderId: string
+  razorpayPaymentId: string
+  amount: number
+  currency: string
+  status: string
+  createdAt: Date
+}
 ```
 
-This will create an admin user in your MongoDB database using the credentials from your `.env.local` file.
+## 🚀 Deployment
 
-### API routes
+### Vercel Deployment
+1. Connect your GitHub repository to Vercel
+2. Set environment variables in Vercel dashboard
+3. Deploy automatically on push to main branch
 
-**Payment & Enrollment:**
-- `POST /api/razorpay/order`: Creates a Razorpay order (default amount 29900 paise).
-- `POST /api/razorpay/verify`: Verifies payment signature.
-- `POST /api/enroll`: Verifies the payment and marks user as enrolled in MongoDB.
-
-**User Authentication:**
-- `POST /api/auth/signup`: User registration with email, password, and mobile number.
-- `POST /api/auth/login`: User login with email and password.
-- `POST /api/auth/logout`: User logout.
-- `GET /api/auth/me`: Get current user data.
-
-**Admin Authentication:**
-- `POST /api/admin/login`: Admin login with email and password.
-- `POST /api/admin/logout`: Admin logout.
-- `GET /api/admin/me`: Get current admin data.
-
-**Admin Management:**
-- `GET /api/admin/students`: Get all students (admin only).
-- `DELETE /api/admin/students/[id]`: Delete a student (admin only).
-- `GET /api/admin/stats`: Get platform statistics (admin only).
-
-### Database Models
-
-**User Model:**
-- Basic info: name, email, mobile, password
-- Course data: enrolledCourse, progress, transactionId
-- Additional: avatarUrl, address, city, state, country, zip
-- Role: user (default)
-
-**Admin Model:**
-- Basic info: name, email, password
-- Role: admin, super-admin
-- Status: isActive, lastLogin
-
-**Payment Model:**
-- Razorpay transaction details
-- Amount, currency, status
-- User association
-
-### Admin Panel Features
-
-- **Dashboard**: Overview of platform statistics
-- **Student Management**: View, edit, delete students
-- **Analytics**: Platform performance metrics
-- **Settings**: Platform configuration
-
-### Authentication Flow
-
-1. **Student Login**: Uses the same login form, redirects to `/dashboard` if enrolled, `/enroll` if not enrolled
-2. **Admin Login**: Uses the same login form, automatically detects admin credentials and redirects to `/admin`
-3. **Role-based Navigation**: Different navigation options based on user role
-
-### Run the app
-
-```
-npm run dev
+### Manual Deployment
+```bash
+npm run build
+npm run start
 ```
 
-**Access Points:**
-- Home: `http://localhost:3000`
-- Student Auth: `http://localhost:3000/auth`
-- Admin Panel: `http://localhost:3000/admin` (requires admin login)
-- Course Enrollment: `http://localhost:3000/enroll`
-- Student Dashboard: `http://localhost:3000/dashboard`
+## 📊 API Endpoints
 
-### Admin Login
+### Authentication
+- `POST /api/auth/signup` - User registration
+- `POST /api/auth/login` - User login
+- `POST /api/auth/logout` - User logout
+- `GET /api/auth/me` - Get current user
 
-Use the same login form at `/auth` with your admin credentials:
-- Email: `admin@example.com` (or your ADMIN_EMAIL)
-- Password: Your ADMIN_PASSWORD
+### Admin
+- `POST /api/admin/login` - Admin login
+- `GET /api/admin/students` - Get all students
+- `GET /api/admin/stats` - Platform statistics
 
-The system will automatically detect admin credentials and redirect to the admin panel.
+### Payments
+- `POST /api/razorpay/order` - Create payment order
+- `POST /api/razorpay/verify` - Verify payment
+- `POST /api/enroll` - Complete enrollment
+
+## 🛡️ Security Features
+
+- **JWT Authentication**: Secure token-based auth
+- **Password Hashing**: bcryptjs for password security
+- **reCAPTCHA**: Bot protection
+- **Input Validation**: Zod schema validation
+- **CORS Protection**: Cross-origin request security
+
+## 📈 Performance
+
+- **Next.js 14**: Latest React framework
+- **Server Components**: Optimized rendering
+- **Image Optimization**: Next.js Image component
+- **Code Splitting**: Automatic bundle optimization
+- **Caching**: Efficient data caching
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## 📝 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 👨‍💻 Author
+
+**Vishal Mishra**
+- LinkedIn: [vishal-mishra-454b67204](https://www.linkedin.com/in/vishal-mishra-454b67204/)
+- GitHub: [@vishal-mishra](https://github.com/vishal-mishra)
+
+## 🙏 Acknowledgments
+
+- MBA alumni for expert guidance
+- Students for valuable feedback
+- Open source community for amazing tools
+
+## 📞 Support
+
+For support, email support@placementpulse.com or create an issue in this repository.
+
+---
+
+**Made with ❤️ for MBA students by MBA alumni**

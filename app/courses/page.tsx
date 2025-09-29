@@ -75,10 +75,8 @@ export default function CoursesPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-purple-50/30 dark:from-slate-900 dark:to-slate-800">
-      <Navigation />
-      
       {/* Hero Section */}
-      <section className="py-12 sm:py-16 relative overflow-hidden">
+      <section className="py-12 sm:py-16 pt-20 lg:pt-24 relative overflow-hidden">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center max-w-3xl mx-auto">
             <div className="inline-block mb-4">
@@ -189,11 +187,11 @@ export default function CoursesPage() {
                       <div className="flex items-center gap-1">
                         <Star className="h-3 w-3 text-yellow-500 fill-current" />
                         <span className="text-xs font-medium">{course.rating || '4.8'}</span>
-                        <span className="text-xs text-gray-500">({course.reviews || '0'})</span>
+                        <span className="text-xs text-gray-500">({course.reviews || '35'})</span>
                       </div>
                       <div className="flex items-center gap-1">
                         <Users className="h-3 w-3 text-gray-400" />
-                        <span className="text-xs text-gray-500">{course.students || '0+'}</span>
+                        <span className="text-xs text-gray-500">{course.students || '300+'}</span>
                       </div>
                     </div>
 
@@ -220,7 +218,7 @@ export default function CoursesPage() {
                           </Button>
                         </Link>
                       ) : (
-                        <Link href={user ? "/enroll" : "/auth"}>
+                        <Link href={user ? "/enroll" : "/auth?mode=signup"}>
                           <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-3 rounded-md shadow-md hover:shadow-lg transition-all duration-300 text-sm">
                             <span>Enroll Now</span>
                             <ArrowRight className="ml-1 h-3 w-3" />

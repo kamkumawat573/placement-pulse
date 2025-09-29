@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button"
 import { Clock, User, Tag, Calendar, ArrowRight, Search, Filter } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import Link from "next/link"
-import { Navigation } from "@/components/navigation"
 
 interface Blog {
   id: string;
@@ -62,10 +61,8 @@ export default function BlogsPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-purple-50/30 dark:from-slate-900 dark:to-slate-800">
-      <Navigation />
-      
       {/* Hero Section */}
-      <section className="py-20 sm:py-24 lg:py-32 relative overflow-hidden">
+      <section className="py-20 sm:py-24 lg:py-32 pt-20 lg:pt-24 relative overflow-hidden">
         {/* Light Animated Background Elements */}
         <div className="absolute inset-0">
           <div className="absolute top-20 left-10 w-32 h-32 bg-blue-200/20 rounded-full animate-float"></div>

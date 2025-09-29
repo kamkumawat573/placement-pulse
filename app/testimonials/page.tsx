@@ -1,14 +1,20 @@
 "use client"
 
-import { useEffect, useRef } from "react"
+import { useEffect, useRef, useState } from "react"
+import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Navigation } from "@/components/navigation"
 import { Star, ArrowRight, Quote, Building, Users, TrendingUp, Award, CheckCircle } from "lucide-react"
 
 export default function TestimonialsPage() {
   const observerRef = useRef<IntersectionObserver | null>(null)
+  const scrollContainerRef = useRef<HTMLDivElement>(null)
+  const [isPaused, setIsPaused] = useState(false)
+  const [isDragging, setIsDragging] = useState(false)
+  const [dragStart, setDragStart] = useState({ x: 0, scrollPosition: 0 })
+  const [scrollPosition, setScrollPosition] = useState(0)
+  const animationRef = useRef<number>()
 
   useEffect(() => {
     // Intersection Observer for scroll animations
@@ -31,112 +37,224 @@ export default function TestimonialsPage() {
     return () => observerRef.current?.disconnect()
   }, [])
 
+  // Smooth infinite scroll using JavaScript
+  useEffect(() => {
+    const container = scrollContainerRef.current
+    if (!container) return
+
+    const scrollSpeed = 0.5 // pixels per frame
+    const containerWidth = container.scrollWidth / 3 // One-third the total width (since we have 3 sets)
+
+    const animate = () => {
+      if (!isPaused && !isDragging) {
+        setScrollPosition(prev => {
+          const newPosition = prev + scrollSpeed
+          // Create seamless loop by resetting to 0 when reaching the end
+          if (newPosition >= containerWidth) {
+            return 0 // Instant reset for seamless loop
+          }
+          return newPosition
+        })
+      }
+      animationRef.current = requestAnimationFrame(animate)
+    }
+
+    animationRef.current = requestAnimationFrame(animate)
+
+    return () => {
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current)
+      }
+    }
+  }, [isPaused, isDragging])
+
+  // Update transform when scroll position changes
+  useEffect(() => {
+    const container = scrollContainerRef.current
+    if (container) {
+      container.style.transform = `translateX(-${scrollPosition}px)`
+    }
+  }, [scrollPosition])
+
+  // Mouse drag handlers
+  const handleMouseDown = (e: React.MouseEvent) => {
+    setIsDragging(true)
+    setIsPaused(true)
+    setDragStart({
+      x: e.clientX,
+      scrollPosition: scrollPosition
+    })
+  }
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging) return
+    
+    const deltaX = e.clientX - dragStart.x
+    const newPosition = dragStart.scrollPosition - deltaX
+    const containerWidth = scrollContainerRef.current?.scrollWidth ? scrollContainerRef.current.scrollWidth / 3 : 0
+    
+    // Handle infinite scroll bounds seamlessly
+    if (newPosition < 0) {
+      setScrollPosition(containerWidth + newPosition)
+    } else if (newPosition >= containerWidth) {
+      setScrollPosition(newPosition - containerWidth)
+    } else {
+      setScrollPosition(newPosition)
+    }
+  }
+
+  const handleMouseUp = () => {
+    setIsDragging(false)
+    setIsPaused(false)
+  }
+
+  const handleMouseLeave = () => {
+    setIsDragging(false)
+    setIsPaused(false)
+  }
+
+  // Touch handlers for mobile
+  const handleTouchStart = (e: React.TouchEvent) => {
+    const touch = e.touches[0]
+    setIsDragging(true)
+    setIsPaused(true)
+    setDragStart({
+      x: touch.clientX,
+      scrollPosition: scrollPosition
+    })
+  }
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!isDragging) return
+    
+    const touch = e.touches[0]
+    const deltaX = touch.clientX - dragStart.x
+    const newPosition = dragStart.scrollPosition - deltaX
+    const containerWidth = scrollContainerRef.current?.scrollWidth ? scrollContainerRef.current.scrollWidth / 3 : 0
+    
+    // Handle infinite scroll bounds seamlessly
+    if (newPosition < 0) {
+      setScrollPosition(containerWidth + newPosition)
+    } else if (newPosition >= containerWidth) {
+      setScrollPosition(newPosition - containerWidth)
+    } else {
+      setScrollPosition(newPosition)
+    }
+  }
+
+  const handleTouchEnd = () => {
+    setIsDragging(false)
+    setIsPaused(false)
+  }
+
   const featuredTestimonials = [
     {
-      name: "Sarah Johnson",
-      role: "CEO",
-      company: "TechStart Inc.",
+      name: "Priya Sharma",
+      role: "MBA Student",
+      company: "IIM Ahmedabad",
       content:
-        "This platform transformed our entire development workflow. We've seen a 300% increase in deployment speed and our team productivity has never been higher. The support team is exceptional.",
+        "Placement Pulse transformed my GD-PI preparation completely. The structured approach and real-time feedback helped me crack McKinsey's case interview. The mentorship from IIM alumni was invaluable.",
       rating: 5,
-      image: "SJ",
-      results: "300% faster deployments",
+      image: "PS",
+      results: "Secured McKinsey Offer",
     },
     {
-      name: "Michael Chen",
-      role: "CTO",
-      company: "DataFlow Systems",
+      name: "Arjun Patel",
+      role: "MBA Student",
+      company: "IIM Bangalore",
       content:
-        "The scalability and reliability are outstanding. We handle millions of requests daily without any issues. The analytics and monitoring tools give us complete visibility into our applications.",
+        "The platform's comprehensive coverage of consulting, finance, and tech roles helped me prepare for multiple profiles. I landed offers from BCG, Goldman Sachs, and Google. The mock interviews were game-changers.",
       rating: 5,
-      image: "MC",
-      results: "99.99% uptime achieved",
+      image: "AP",
+      results: "Multiple Top Offers",
     },
     {
-      name: "Emily Rodriguez",
-      role: "Lead Developer",
-      company: "Creative Solutions",
+      name: "Sneha Reddy",
+      role: "MBA Student",
+      company: "IIM Calcutta",
       content:
-        "As a developer, I love how intuitive and powerful the platform is. The documentation is comprehensive, and the developer experience is simply the best I've encountered.",
+        "As someone from a non-engineering background, I was nervous about technical interviews. Placement Pulse's structured approach and peer learning helped me crack Amazon's PM role. The community support was incredible.",
       rating: 5,
-      image: "ER",
-      results: "50% reduction in dev time",
+      image: "SR",
+      results: "Amazon PM Role",
     },
   ]
 
   const testimonials = [
     {
-      name: "David Kim",
-      role: "Product Manager",
-      company: "InnovateCorp",
+      name: "Rahul Kumar",
+      role: "MBA Student",
+      company: "IIM Indore",
       content:
-        "The collaboration features have revolutionized how our team works together. Real-time updates and seamless integration with our existing tools.",
+        "The GD preparation sessions were exceptional. I went from being nervous to leading discussions confidently. The feedback from seniors helped me improve my communication skills significantly.",
       rating: 5,
     },
     {
-      name: "Lisa Wang",
-      role: "DevOps Engineer",
-      company: "CloudTech",
+      name: "Ananya Singh",
+      role: "MBA Student",
+      company: "IIM Lucknow",
       content:
-        "Deployment has never been easier. The automated scaling and monitoring save us countless hours every week.",
+        "Placement Pulse's case study preparation was comprehensive. The structured approach to solving business cases helped me crack BCG's final round. The practice sessions were invaluable.",
       rating: 5,
     },
     {
-      name: "James Wilson",
-      role: "Startup Founder",
-      company: "NextGen Apps",
+      name: "Vikram Joshi",
+      role: "MBA Student",
+      company: "IIM Kozhikode",
       content:
-        "As a startup, we needed something reliable and cost-effective. This platform delivered on both fronts and helped us scale rapidly.",
+        "The platform's coverage of different industries and roles helped me prepare for consulting, finance, and tech interviews. I secured offers from Deloitte, JP Morgan, and Microsoft.",
       rating: 5,
     },
     {
-      name: "Maria Garcia",
-      role: "Senior Developer",
-      company: "WebSolutions",
+      name: "Kavya Nair",
+      role: "MBA Student",
+      company: "IIM Shillong",
       content:
-        "The performance improvements we've seen are incredible. Our applications load faster and handle more traffic than ever before.",
+        "As someone from a non-business background, I was worried about placement preparation. Placement Pulse's structured curriculum and peer learning helped me build confidence and land my dream role at P&G.",
       rating: 5,
     },
     {
-      name: "Alex Thompson",
-      role: "Technical Director",
-      company: "DigitalFirst",
+      name: "Rohit Agarwal",
+      role: "MBA Student",
+      company: "IIM Raipur",
       content:
-        "Security was our top concern, and this platform exceeded our expectations. Enterprise-grade security with ease of use.",
+        "The mock interview sessions with industry experts were game-changers. The personalized feedback helped me identify my weak areas and improve significantly. I cracked Goldman Sachs' final round.",
       rating: 5,
     },
     {
-      name: "Rachel Brown",
-      role: "Full Stack Developer",
-      company: "ModernWeb Co.",
+      name: "Divya Mehta",
+      role: "MBA Student",
+      company: "IIM Trichy",
       content:
-        "The developer tools and APIs are fantastic. Everything just works as expected, and the learning curve is minimal.",
+        "The platform's focus on both technical and soft skills preparation was perfect. The resume building workshops and LinkedIn optimization sessions helped me stand out in the crowd.",
       rating: 5,
     },
   ]
 
   const stats = [
-    { icon: Users, number: "10,000+", label: "Happy Customers", color: "text-blue-500" },
-    { icon: Star, number: "4.9/5", label: "Average Rating", color: "text-yellow-500" },
-    { icon: TrendingUp, number: "98%", label: "Customer Retention", color: "text-green-500" },
-    { icon: Award, number: "50+", label: "Industry Awards", color: "text-purple-500" },
+    { icon: Users, number: "1,500+", label: "MBA Students", color: "text-blue-500" },
+    { icon: Star, number: "4.9/5", label: "Student Rating", color: "text-yellow-500" },
+    { icon: TrendingUp, number: "95%", label: "Placement Success", color: "text-green-500" },
+    { icon: Award, number: "500+", label: "Dream Offers", color: "text-purple-500" },
   ]
 
   const companies = [
-    "TechStart Inc.",
-    "DataFlow Systems",
-    "Creative Solutions",
-    "InnovateCorp",
-    "CloudTech",
-    "NextGen Apps",
-    "WebSolutions",
-    "DigitalFirst",
+    "McKinsey & Company",
+    "Boston Consulting Group",
+    "Bain & Company",
+    "Goldman Sachs",
+    "JP Morgan",
+    "Amazon",
+    "Microsoft",
+    "Google",
+    "Deloitte",
+    "PwC",
+    "P&G",
+    "Unilever",
   ]
 
   return (
     <div className="min-h-screen">
-      <Navigation />
-
       {/* Hero Section */}
       <section className="relative pt-24 pb-20 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-950/20 dark:to-pink-950/20" />
@@ -242,99 +360,139 @@ export default function TestimonialsPage() {
         </div>
       </section>
 
-      {/* More Testimonials Grid */}
-      <section className="py-20">
+      {/* More Testimonials - Horizontal Scrolling */}
+      <section className="py-20 overflow-hidden">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-bold mb-4 scroll-animate opacity-0 translate-y-8">
               What Our MBA Students Say
             </h2>
           </div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {testimonials.map((testimonial, index) => (
-              <Card
-                key={index}
-                className="scroll-animate opacity-0 translate-y-8 hover:scale-105 transition-all duration-300 hover:shadow-lg"
-                style={{ animationDelay: `${index * 0.05}s` }}
-              >
-                <CardHeader className="pb-3">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex space-x-1">
-                      {[...Array(testimonial.rating)].map((_, i) => (
-                        <Star key={i} className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                      ))}
+          
+          {/* Horizontal Scrolling Container */}
+          <div className="relative overflow-hidden">
+            {/* Left fade gradient */}
+            <div className="absolute left-0 top-0 bottom-0 w-8 sm:w-12 md:w-16 lg:w-20 bg-gradient-to-r from-background to-transparent z-10 pointer-events-none"></div>
+            
+            {/* Right fade gradient */}
+            <div className="absolute right-0 top-0 bottom-0 w-8 sm:w-12 md:w-16 lg:w-20 bg-gradient-to-l from-background to-transparent z-10 pointer-events-none"></div>
+            
+            <div 
+              ref={scrollContainerRef}
+              className="flex gap-3 sm:gap-4 md:gap-6 smooth-scroll-container cursor-grab active:cursor-grabbing select-none touch-pan-x"
+              onMouseEnter={() => setIsPaused(true)}
+              onMouseLeave={handleMouseLeave}
+              onMouseDown={handleMouseDown}
+              onMouseMove={handleMouseMove}
+              onMouseUp={handleMouseUp}
+              onTouchStart={handleTouchStart}
+              onTouchMove={handleTouchMove}
+              onTouchEnd={handleTouchEnd}
+              style={{ userSelect: 'none', touchAction: 'pan-x' }}
+            >
+              {/* First set of testimonials */}
+              {testimonials.map((testimonial, index) => (
+                <Card
+                  key={`first-${index}`}
+                  className="flex-shrink-0 w-72 sm:w-80 hover:scale-105 transition-all duration-300 hover:shadow-lg"
+                >
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex space-x-1">
+                        {[...Array(testimonial.rating)].map((_, i) => (
+                          <Star key={i} className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                        ))}
+                      </div>
+                      <Quote className="h-5 w-5 text-accent/30" />
                     </div>
-                    <Quote className="h-5 w-5 text-accent/30" />
-                  </div>
-                  <CardTitle className="text-base">{testimonial.name}</CardTitle>
-                  <CardDescription className="text-sm">
-                    {testimonial.role} at {testimonial.company}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground leading-relaxed">"{testimonial.content}"</p>
-                </CardContent>
-              </Card>
-            ))}
+                    <CardTitle className="text-base">{testimonial.name}</CardTitle>
+                    <CardDescription className="text-sm">
+                      {testimonial.role} at {testimonial.company}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground leading-relaxed">"{testimonial.content}"</p>
+                  </CardContent>
+                </Card>
+              ))}
+              
+              {/* Second set of testimonials for seamless loop */}
+              {testimonials.map((testimonial, index) => (
+                <Card
+                  key={`second-${index}`}
+                  className="flex-shrink-0 w-72 sm:w-80 hover:scale-105 transition-all duration-300 hover:shadow-lg"
+                >
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex space-x-1">
+                        {[...Array(testimonial.rating)].map((_, i) => (
+                          <Star key={i} className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                        ))}
+                      </div>
+                      <Quote className="h-5 w-5 text-accent/30" />
+                    </div>
+                    <CardTitle className="text-base">{testimonial.name}</CardTitle>
+                    <CardDescription className="text-sm">
+                      {testimonial.role} at {testimonial.company}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground leading-relaxed">"{testimonial.content}"</p>
+                  </CardContent>
+                </Card>
+              ))}
+              
+              {/* Third set for ultra-smooth transition */}
+              {testimonials.map((testimonial, index) => (
+                <Card
+                  key={`third-${index}`}
+                  className="flex-shrink-0 w-72 sm:w-80 hover:scale-105 transition-all duration-300 hover:shadow-lg"
+                >
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex space-x-1">
+                        {[...Array(testimonial.rating)].map((_, i) => (
+                          <Star key={i} className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                        ))}
+                      </div>
+                      <Quote className="h-5 w-5 text-accent/30" />
+                    </div>
+                    <CardTitle className="text-base">{testimonial.name}</CardTitle>
+                    <CardDescription className="text-sm">
+                      {testimonial.role} at {testimonial.company}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground leading-relaxed">"{testimonial.content}"</p>
+                  </CardContent>
+                </Card>
+              ))}
+              
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Trusted By Section */}
-      <section className="py-20 bg-muted/30">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4 scroll-animate opacity-0 translate-y-8">
-              Trusted by MBA Alumni
-            </h2>
-          </div>
-          <div className="flex flex-wrap justify-center items-center gap-8 opacity-60">
-            {companies.map((company, index) => (
-              <div
-                key={index}
-                className="scroll-animate opacity-0 translate-y-8 hover:opacity-100 transition-opacity"
-                style={{ animationDelay: `${index * 0.1}s` }}
-              >
-                <div className="flex items-center space-x-2 px-4 py-2 bg-card rounded-lg border">
-                  <Building className="h-5 w-5 text-accent" />
-                  <span className="font-medium">{company}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
+     
+    
       {/* CTA Section */}
       <section className="py-20">
         <div className="container mx-auto px-4 text-center">
           <div className="max-w-3xl mx-auto scroll-animate opacity-0 translate-y-8">
-            <h2 className="text-4xl md:text-5xl font-bold mb-6">Ready to Join These Success Stories?</h2>
+            <h2 className="text-4xl md:text-5xl font-bold mb-6">Ready to Join These MBA Success Stories?</h2>
             <p className="text-xl text-muted-foreground mb-8">
-              Start your journey today and see why thousands of MBA students choose our platform.
+              Start your MBA placement journey today and see why thousands of students choose our comprehensive preparation program.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" className="group hover:scale-105 transition-all duration-300">
-                Start Your Preparation Today
-                <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
-              </Button>
-              <Button size="lg" variant="outline" className="hover:scale-105 transition-transform bg-transparent">
-                Read More Success Stories
-              </Button>
+              <Link href="/courses">
+                <Button size="lg" className="group hover:scale-105 transition-all duration-300">
+                  Start Your MBA Placement Journey
+                  <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                </Button>
+              </Link>
+             
             </div>
             <div className="flex items-center justify-center space-x-4 mt-8 text-sm text-muted-foreground">
-              <div className="flex items-center space-x-1">
-                <CheckCircle className="h-4 w-4 text-green-500" />
-                <span>Free 14-day trial</span>
-              </div>
-              <div className="flex items-center space-x-1">
-                <CheckCircle className="h-4 w-4 text-green-500" />
-                <span>No credit card required</span>
-              </div>
-              <div className="flex items-center space-x-1">
-                <CheckCircle className="h-4 w-4 text-green-500" />
-                <span>Cancel anytime</span>
-              </div>
             </div>
           </div>
         </div>

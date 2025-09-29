@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/mongodb';
 import { verifyAdmin } from '@/lib/admin-auth';
+
+export const dynamic = 'force-dynamic'
 import { UserModel } from '@/lib/models/User';
 import { PaymentModel } from '@/lib/models/Payment';
 

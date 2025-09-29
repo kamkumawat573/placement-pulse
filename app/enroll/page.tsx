@@ -8,19 +8,9 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
 import { useAuth } from "@/contexts/auth-context"
-import { CheckCircle, CreditCard, Shield, Clock, Users, Award, Loader2 } from "lucide-react"
-import { Navigation } from "@/components/navigation"
+import { CheckCircle, CreditCard, Clock, Users, Award, Loader2 } from "lucide-react"
 
-const courseFeatures = [
-  "40+ hours of premium video content",
-  "15 hands-on projects and exercises",
-  "Lifetime access to course materials",
-  "Certificate of completion",
-  "Direct instructor support",
-  "Access to private Discord community",
-  "Regular content updates",
-  "30-day money-back guarantee",
-]
+// Course features will be fetched dynamically from the course data
 
 // Removed manual payment inputs. Razorpay modal will collect payment details.
 
@@ -32,45 +22,81 @@ export default function EnrollPage() {
   const [coursePrice, setCoursePrice] = useState(29900) // Default price in paise
   const [courseId, setCourseId] = useState("") // Store actual course ID
   const [courseInfo, setCourseInfo] = useState({
-    title: "Modern Web Development",
+    title: "MBA Placement Mastery Program",
+    description: "Master Group Discussions, Interviews, and Placement Strategies with expert guidance from MBA alumni",
+    shortDescription: "Comprehensive MBA placement preparation course",
     price: 299,
     originalPrice: 599,
-    discount: "50% OFF"
+    discount: "50% OFF",
+    duration: "40+ Hours",
+    level: "Beginner to Advanced",
+    category: "MBA Placements",
+    instructor: "MBA Alumni Experts",
+    image: "/api/placeholder/400/300",
+    features: [
+      "40+ hours of premium placement content",
+      "15+ mock interviews and GD sessions",
+      "Lifetime access to placement materials",
+      "Certificate of completion",
+      "Direct mentorship from MBA alumni",
+      "Access to exclusive placement community",
+      "Regular content updates",
+      "30-day money-back guarantee",
+    ],
+    modules: [] as Array<{week: string, title: string, lessons: string, duration: string}>,
+    testimonials: [] as Array<{name: string, role: string, content: string, rating: number, avatar: string}>,
+    students: "2,500+",
+    rating: 4.5,
+    reviews: "150+"
   })
 
-  const fetchCoursePrice = async () => {
+  const fetchCourseData = async () => {
     try {
-      // For now, we'll fetch the first active course
-      // In a real application, you might want to pass courseId as a parameter
+      // Fetch the first active course from the admin panel
       const response = await fetch(`/api/courses?t=${Date.now()}`)
       if (response.ok) {
         const data = await response.json()
         if (data.courses && data.courses.length > 0) {
-          const course = data.courses[0] // Get the first course
+          const course = data.courses[0] // Get the first active course
           setCourseId(course.id) // Store the actual course ID
           setCoursePrice(course.price)
           setCourseInfo({
             title: course.title,
+            description: course.description,
+            shortDescription: course.shortDescription,
             price: course.price / 100, // Convert from paise to rupees
             originalPrice: course.originalPrice / 100,
-            discount: course.discount
+            discount: course.discount,
+            duration: course.duration,
+            level: course.level,
+            category: course.category,
+            instructor: course.instructor,
+            image: course.image,
+            features: course.features || [],
+            modules: course.modules || [],
+            testimonials: course.testimonials || [],
+            students: course.students || "0+",
+            rating: course.rating || 4.5,
+            reviews: course.reviews || "0"
           })
-          console.log('Course price updated:', {
+          console.log('Course data updated:', {
             courseId: course.id,
+            title: course.title,
             price: course.price,
-            displayPrice: course.price / 100
+            displayPrice: course.price / 100,
+            features: course.features?.length || 0
           })
         }
       }
     } catch (error) {
-      console.error('Error fetching course price:', error)
+      console.error('Error fetching course data:', error)
       // Keep default values if fetch fails
     }
   }
 
   useEffect(() => {
     setMounted(true)
-    fetchCoursePrice()
+    fetchCourseData()
     // Load Razorpay Checkout script
     const script = document.createElement("script")
     script.src = "https://checkout.razorpay.com/v1/checkout.js"
@@ -84,7 +110,7 @@ export default function EnrollPage() {
   }, [user, router])
 
   if (!mounted || !user) {
-    return <div className="min-h-screen flex items-center justify-center">Loading...</div>
+    return <div className="min-h-screen flex items-center justify-center pt-20 lg:pt-24">Loading...</div>
   }
 
   // No input handling needed; Razorpay collects card details securely.
@@ -94,8 +120,8 @@ export default function EnrollPage() {
     try {
       setProcessing(true)
 
-      // Refresh course price before payment to ensure we have the latest price
-      await fetchCoursePrice()
+      // Refresh course data before payment to ensure we have the latest information
+      await fetchCourseData()
 
       console.log('Creating payment order with:', {
         courseId,
@@ -180,13 +206,11 @@ export default function EnrollPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navigation />
-
       <div className="container mx-auto px-4 py-8 pt-24">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold mb-4">Complete Your Enrollment</h1>
-            <p className="text-xl text-muted-foreground">Join thousands of students learning modern web development</p>
+            <h1 className="text-4xl font-bold mb-4">Complete Your MBA Placement Enrollment</h1>
+            <p className="text-xl text-muted-foreground">{courseInfo.shortDescription}</p>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -194,8 +218,17 @@ export default function EnrollPage() {
             <div className="space-y-6">
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-2xl">Modern Web Development Course</CardTitle>
-                  <CardDescription>Master React, Next.js, and TypeScript with hands-on projects</CardDescription>
+                  <div className="flex flex-col sm:flex-row items-start gap-4 sm:gap-6">
+                    <img 
+                      src={courseInfo.image} 
+                      alt={courseInfo.title}
+                      className="w-full sm:w-48 h-48 sm:h-48 object-cover rounded-xl flex-shrink-0 shadow-lg"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <CardTitle className="text-2xl sm:text-3xl leading-tight">{courseInfo.title}</CardTitle>
+                      <CardDescription className="text-base sm:text-lg mt-2 leading-relaxed">{courseInfo.description}</CardDescription>
+                    </div>
+                  </div>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
@@ -214,21 +247,34 @@ export default function EnrollPage() {
                       </div>
                     </div>
                     <Separator />
-                    <div className="grid grid-cols-3 gap-4 text-center">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 text-center">
                       <div>
                         <Clock className="h-6 w-6 mx-auto mb-2 text-accent" />
-                        <div className="text-sm font-medium">40+ Hours</div>
+                        <div className="text-sm font-medium">{courseInfo.duration}</div>
                         <div className="text-xs text-muted-foreground">Content</div>
                       </div>
                       <div>
                         <Users className="h-6 w-6 mx-auto mb-2 text-accent" />
+                        {/* <div className="text-sm font-medium">{courseInfo.students}</div> */}
                         <div className="text-sm font-medium">2,500+</div>
                         <div className="text-xs text-muted-foreground">Students</div>
                       </div>
-                      <div>
+                      <div className="col-span-2 sm:col-span-1">
                         <Award className="h-6 w-6 mx-auto mb-2 text-accent" />
-                        <div className="text-sm font-medium">Certificate</div>
-                        <div className="text-xs text-muted-foreground">Included</div>
+                        <div className="text-sm font-medium">{courseInfo.level}</div>
+                        <div className="text-xs text-muted-foreground">Level</div>
+                      </div>
+                    </div>
+                    <div className="pt-4 border-t">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+                        <div className="flex justify-between items-center">
+                          <span className="text-muted-foreground">Instructor:</span>
+                          <span className="font-medium">{courseInfo.instructor}</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-muted-foreground">Category:</span>
+                          <span className="font-medium">{courseInfo.category}</span>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -237,11 +283,11 @@ export default function EnrollPage() {
 
               <Card>
                 <CardHeader>
-                  <CardTitle>What's Included</CardTitle>
+                  <CardTitle>What's Included in Your MBA Placement Journey</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    {courseFeatures.map((feature, index) => (
+                    {courseInfo.features.map((feature, index) => (
                       <div key={index} className="flex items-center gap-3">
                         <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0" />
                         <span className="text-sm">{feature}</span>
@@ -251,24 +297,34 @@ export default function EnrollPage() {
                 </CardContent>
               </Card>
 
-              <Card className="bg-accent/5 border-accent/20">
-                <CardContent className="p-6">
-                  <div className="flex items-center gap-3 mb-3">
-                    <Shield className="h-6 w-6 text-accent" />
-                    <span className="font-semibold">30-Day Money-Back Guarantee</span>
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    Not satisfied with the course? Get a full refund within 30 days, no questions asked.
-                  </p>
-                </CardContent>
-              </Card>
+              {courseInfo.modules && courseInfo.modules.length > 0 && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Placement Preparation Modules</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      {courseInfo.modules.map((module, index) => (
+                        <div key={index} className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
+                          <div>
+                            <div className="font-medium text-sm">{module.title}</div>
+                            <div className="text-xs text-muted-foreground">{module.lessons} • {module.duration}</div>
+                          </div>
+                          <div className="text-xs text-muted-foreground">{module.week}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
             </div>
 
             {/* Payment Summary and proceed */}
             <div className="space-y-6">
               <Card>
                 <CardHeader>
-                  <CardTitle>Order Summary</CardTitle>
+                  <CardTitle>MBA Placement Course Summary</CardTitle>
                   <CardDescription>Secure checkout via Razorpay</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
@@ -297,7 +353,7 @@ export default function EnrollPage() {
                     ) : (
                       <>
                         <CreditCard className="mr-2 h-4 w-4" />
-                        Proceed to Payment
+                        Enroll in MBA Placement Program
                       </>
                     )}
                   </Button>

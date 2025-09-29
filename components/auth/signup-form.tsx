@@ -3,12 +3,13 @@
 import type React from "react"
 
 import { useState, useRef } from "react"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { useAuth } from "@/contexts/auth-context"
-import { Loader2 } from "lucide-react"
+import { Loader2, ArrowLeft, Home } from "lucide-react"
 import { ReCaptcha, ReCaptchaRef } from "@/components/ui/recaptcha"
 
 interface SignupFormProps {
@@ -25,6 +26,7 @@ export function SignupForm({ onToggleMode, onSuccess }: SignupFormProps) {
   const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null)
   const { signup, loading } = useAuth()
   const recaptchaRef = useRef<ReCaptchaRef>(null)
+  const router = useRouter()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -66,6 +68,19 @@ export function SignupForm({ onToggleMode, onSuccess }: SignupFormProps) {
   return (
     <Card className="w-full max-w-md">
       <CardHeader className="text-center">
+        <div className="flex items-center justify-between mb-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => router.push('/')}
+            className="flex items-center gap-2 text-muted-foreground hover:text-foreground"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            <span className="hidden sm:inline">Back to Home</span>
+            <Home className="h-4 w-4 sm:hidden" />
+          </Button>
+          <div className="flex-1"></div>
+        </div>
         <CardTitle className="text-2xl font-bold">Create Account</CardTitle>
         <CardDescription>Join us to start learning</CardDescription>
       </CardHeader>

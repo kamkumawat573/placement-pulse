@@ -1,5 +1,6 @@
 "use client"
 
+
 import { useEffect, useState } from "react"
 import { useRouter, useParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
@@ -116,14 +117,14 @@ export default function ModulePage() {
   }, [user, router])
 
   if (!mounted || !user) {
-    return <div className="min-h-screen flex items-center justify-center">Loading...</div>
+    return <div className="min-h-screen flex items-center justify-center pt-20 lg:pt-24">Loading...</div>
   }
 
   const module = moduleContent[moduleId as keyof typeof moduleContent]
 
   if (!module) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center pt-20 lg:pt-24">
         <div className="text-center">
           <h1 className="text-2xl font-bold mb-4">Module Not Found</h1>
           <Link href="/dashboard">
@@ -169,7 +170,7 @@ export default function ModulePage() {
         </div>
       </header>
 
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-8 pt-20 lg:pt-24">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* Lesson Sidebar */}
           <div className="lg:col-span-1">

@@ -1358,6 +1358,61 @@ export default function AdminDashboard() {
     }
   };
 
+  const deleteCourse = async (courseId: string) => {
+    if (!confirm('Are you sure you want to delete this course? This action cannot be undone.')) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/admin/courses/${courseId}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        setCourses(courses.filter(c => c._id !== courseId));
+        alert('Course deleted successfully!');
+      } else {
+        const error = await response.json();
+        alert(`Failed to delete course: ${error.error || 'Unknown error'}`);
+      }
+    } catch (error) {
+      console.error('Failed to delete course:', error);
+      alert('Failed to delete course. Please try again.');
+    }
+  };
+
+  const toggleCourseVisibility = async (courseId: string) => {
+    try {
+      const course = courses.find(c => c._id === courseId);
+      if (!course) return;
+
+      const response = await fetch(`/api/admin/courses/${courseId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          isActive: !course.isActive
+        }),
+      });
+
+      if (response.ok) {
+        setCourses(courses.map(c => 
+          c._id === courseId 
+            ? { ...c, isActive: !c.isActive }
+            : c
+        ));
+        alert(`Course ${!course.isActive ? 'activated' : 'hidden'} successfully!`);
+      } else {
+        const error = await response.json();
+        alert(`Failed to update course: ${error.error || 'Unknown error'}`);
+      }
+    } catch (error) {
+      console.error('Failed to toggle course visibility:', error);
+      alert('Failed to update course. Please try again.');
+    }
+  };
+
   const saveMessageNotes = async () => {
     if (!selectedMessage) return;
     
@@ -1425,7 +1480,7 @@ export default function AdminDashboard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center pt-20 lg:pt-24">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
       </div>
     );
@@ -1438,7 +1493,7 @@ export default function AdminDashboard() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <div className="bg-white shadow-sm border-b sticky top-0 z-40">
+      <div className="bg-white shadow-sm border-b sticky top-20 lg:top-24 z-40">
         <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 xl:px-8">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center py-3 sm:py-4 gap-3 sm:gap-4">
             <div className="flex-1 min-w-0">
@@ -1459,7 +1514,7 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 xl:px-8 py-4 sm:py-6 lg:py-8">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 xl:px-8 py-4 sm:py-6 lg:py-8 pt-20 lg:pt-24">
         {/* Stats Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 mb-6 sm:mb-8">
           <Card className="hover:shadow-md transition-shadow">
@@ -1793,11 +1848,29 @@ export default function AdminDashboard() {
                           <DollarSign className="h-3 w-3 sm:h-4 sm:w-4" />
                           <span className="hidden sm:inline ml-1">Price</span>
                         </Button>
-                        <Button variant="outline" size="sm" className="flex-1 sm:flex-none text-xs px-2 py-1">
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          onClick={() => toggleCourseVisibility(course._id)}
+                          className={`flex-1 sm:flex-none text-xs px-2 py-1 ${
+                            course.isActive 
+                              ? 'text-orange-600 hover:text-orange-700' 
+                              : 'text-green-600 hover:text-green-700'
+                          }`}
+                          title={course.isActive ? 'Hide Course' : 'Show Course'}
+                        >
                           <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
-                          <span className="hidden sm:inline ml-1">View</span>
+                          <span className="hidden sm:inline ml-1">
+                            {course.isActive ? 'Hide' : 'Show'}
+                          </span>
                         </Button>
-                        <Button variant="outline" size="sm" className="flex-1 sm:flex-none text-xs px-2 py-1">
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          onClick={() => deleteCourse(course._id)}
+                          className="flex-1 sm:flex-none text-xs px-2 py-1 text-red-600 hover:text-red-700"
+                          title="Delete Course"
+                        >
                           <Trash2 className="h-3 w-3 sm:h-4 sm:w-4" />
                           <span className="hidden sm:inline ml-1">Delete</span>
                         </Button>
@@ -1916,7 +1989,7 @@ export default function AdminDashboard() {
                         type="number"
                         value={newCourse.price}
                         onChange={(e) => setNewCourse({...newCourse, price: e.target.value})}
-                        placeholder="299"
+                        placeholder="99"
                       />
                     </div>
                     <div>

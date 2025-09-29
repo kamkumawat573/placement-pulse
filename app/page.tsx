@@ -1,13 +1,13 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
+
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
 import { ArrowRight, Play, Clock, Users, Award, Star, CheckCircle, Youtube, Instagram, Twitter, Linkedin } from "lucide-react"
 import Link from "next/link"
 import { useAuth } from "@/contexts/auth-context"
-import { Navigation } from "@/components/navigation"
 
 export default function HomePage() {
   const heroRef = useRef<HTMLDivElement>(null)
@@ -184,9 +184,6 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen">
-      <Navigation />
-
-
       {/* Hero Section */}
       <section className="relative min-h-screen flex items-center overflow-hidden pt-16 sm:pt-20">
         <div
@@ -221,7 +218,7 @@ export default function HomePage() {
                     </Button>
                   </Link>
                   ) : (
-                    <Link href={user ? "/enroll" : "/auth"}>
+                    <Link href={user ? "/enroll" : "/auth?mode=signup"}>
                       <Button size="lg" className="group font-bold text-xl px-10 py-6 bg-black hover:bg-gray-800 text-white shadow-2xl hover:shadow-black/50 hover:scale-110 hover:-translate-y-1 transition-all duration-500 border-2 border-gray-300 hover:border-white rounded-lg">
                         Enroll Now {course ? `- ${formatPrice(course.price)}` : '- ₹99'}
                         <ArrowRight className="ml-4 h-6 w-6 group-hover:translate-x-2 group-hover:rotate-12 transition-all duration-300" />
@@ -656,9 +653,9 @@ export default function HomePage() {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8 text-center">
             {[
-              { icon: Users, value: "2,500+", label: "Students Enrolled" },
-              { icon: Clock, value: "40+", label: "Hours of Content" },
-              { icon: Award, value: "15", label: "Real Projects" },
+              { icon: Users, value: "1,500+", label: "MBA Students Enrolled" },
+              { icon: Clock, value: "60+", label: "Hours of MBA Content" },
+              { icon: Award, value: "95%", label: "Placement Success Rate" },
               { icon: Star, value: "4.9/5", label: "Student Rating" },
             ].map((stat, index) => (
               <div key={index} className={`animate-on-scroll opacity-0 [animation-delay:${index * 0.1}s] p-4`}>
@@ -717,18 +714,12 @@ export default function HomePage() {
                   {videos[0].description && (
                     <p className="text-sm sm:text-base text-muted-foreground mb-3 sm:mb-4">{videos[0].description}</p>
                   )}
-                  <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4 text-xs sm:text-sm text-muted-foreground">
-                    {videos[0].duration && (
-                      <div className="flex items-center gap-1">
-                        <Clock className="h-3 w-3 sm:h-4 sm:w-4" />
-                        <span>{videos[0].duration}</span>
-                      </div>
-                    )}
-                    <div className="flex items-center gap-1">
-                      <Users className="h-3 w-3 sm:h-4 sm:w-4" />
-                      <span>{videos[0].views} views</span>
+                  {videos[0].duration && (
+                    <div className="flex items-center justify-center gap-1 text-xs sm:text-sm text-muted-foreground">
+                      <Clock className="h-3 w-3 sm:h-4 sm:w-4" />
+                      <span>{videos[0].duration}</span>
                     </div>
-                  </div>
+                  )}
                 </div>
               </div>
             ) : (
@@ -740,7 +731,7 @@ export default function HomePage() {
                         <Play className="h-8 w-8 text-white ml-1" />
                       </div>
                       <h3 className="text-white text-xl font-semibold mb-2">Course Introduction</h3>
-                      <p className="text-white/80">Watch our 5-minute course overview</p>
+                      <p className="text-white/80">Watch our course overview</p>
                     </div>
                   </div>
                   <button className="absolute inset-0 w-full h-full flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
@@ -802,41 +793,53 @@ export default function HomePage() {
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 max-w-6xl mx-auto">
             {[
               {
-                name: "Sarah Johnson",
-                role: "Frontend Developer at Google",
+                name: "Harsh mehta",
+                role: "IIM Indore",
                 content:
-                  "This course transformed my career. The projects were challenging and the instruction was top-notch.",
+                  "I lacked confidence and clarity during GD-PI prep, but Placement Pulse gave me the right guidance, practice, and support. Their mentorship boosted my performance and helped me secure admission to IIM Indore.",
                 rating: 5,
+                image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face"
               },
               {
                 name: "Mike Chen",
-                role: "Full Stack Developer at Stripe",
+                role: "JBIMS",
                 content:
-                  "Best investment I've made in my career. Landed my dream job 3 months after completing the course.",
+                  "I was nervous about GD-PI, CV, and LinkedIn, but Placement Pulse guided me throughout—helping polish my profile, boosting my confidence, and ultimately enabling me to crack JBIMS.",
                 rating: 5,
+                image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face"
               },
               {
                 name: "Emily Rodriguez",
                 role: "React Developer at Airbnb",
                 content: "The hands-on approach and real-world projects made all the difference. Highly recommended!",
                 rating: 5,
+                image: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face"
               },
             ].map((testimonial, index) => (
               <Card
                 key={index}
-                className={`p-4 sm:p-6 animate-on-scroll opacity-0`}
+                className={`p-4 sm:p-6 animate-on-scroll opacity-0 h-full flex flex-col`}
                 style={{ animationDelay: `${index * 0.2}s` }}
               >
-                <CardContent className="p-0">
+                <CardContent className="p-0 flex flex-col h-full">
                   <div className="flex mb-3 sm:mb-4">
                     {[...Array(testimonial.rating)].map((_, i) => (
                       <Star key={i} className="h-3 w-3 sm:h-4 sm:w-4 fill-yellow-400 text-yellow-400" />
                     ))}
                   </div>
-                  <p className="text-xs sm:text-sm text-muted-foreground mb-3 sm:mb-4 leading-relaxed">"{testimonial.content}"</p>
-                  <div>
-                    <div className="font-semibold text-sm sm:text-base">{testimonial.name}</div>
-                    <div className="text-xs sm:text-sm text-muted-foreground">{testimonial.role}</div>
+                  <p className="text-xs sm:text-sm text-muted-foreground mb-4 sm:mb-6 leading-relaxed">"{testimonial.content}"</p>
+                  <div className="flex items-center gap-4 mt-auto">
+                    <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full overflow-hidden flex-shrink-0 border-2 border-primary/20 shadow-lg">
+                      <img 
+                        src={testimonial.image} 
+                        alt={testimonial.name}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="font-semibold text-sm sm:text-base truncate">{testimonial.name}</div>
+                      <div className="text-xs sm:text-sm text-muted-foreground truncate">{testimonial.role}</div>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -863,7 +866,7 @@ export default function HomePage() {
                 </Button>
               </Link>
               ) : (
-                <Link href={user ? "/enroll" : "/auth"}>
+                <Link href={user ? "/enroll" : "/auth?mode=signup"}>
                   <Button size="lg" className="group font-bold text-xl px-10 py-6 bg-black hover:bg-gray-800 text-white shadow-2xl hover:shadow-black/50 hover:scale-110 hover:-translate-y-1 transition-all duration-500 border-2 border-gray-300 hover:border-white rounded-lg w-full sm:w-auto">
                     Enroll Now {course ? `- ${formatPrice(course.price)}` : '- ₹299'}
                     <ArrowRight className="ml-4 h-6 w-6 group-hover:translate-x-2 group-hover:rotate-12 transition-all duration-300" />
@@ -949,6 +952,20 @@ export default function HomePage() {
               >
                 <Linkedin className="h-4 w-4 sm:h-5 sm:w-5" />
               </a>
+            </div>
+            
+            <div className="text-muted-foreground mb-2">
+              <p className="text-xs sm:text-sm">
+                Made with ❤️ by{" "}
+                <a 
+                  href="https://www.linkedin.com/in/vishal-mishra-454b67204/" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-primary hover:underline font-medium"
+                >
+                  Vishal Mishra
+                </a>
+              </p>
             </div>
             
             <div className="text-muted-foreground">

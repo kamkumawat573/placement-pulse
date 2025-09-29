@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
       return new Response(JSON.stringify({ error: "Missing Razorpay credentials" }), { status: 500 })
     }
 
-    let finalAmount = 29900; // Default amount in paise
+    let finalAmount = 9900; // Default amount in paise
     let courseTitle = "Modern Web Development";
 
     // If courseId is provided, fetch the current price from database

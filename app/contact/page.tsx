@@ -3,12 +3,12 @@
 import type React from "react"
 
 import { useEffect, useRef, useState } from "react"
+import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { Navigation } from "@/components/navigation"
 import {
   Mail,
   Phone,
@@ -183,8 +183,6 @@ export default function ContactPage() {
 
   return (
     <div className="min-h-screen">
-      <Navigation />
-
       {/* Hero Section */}
       <section className="relative pt-24 pb-20 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-orange-50 to-red-50 dark:from-orange-950/20 dark:to-red-950/20" />
@@ -465,19 +463,18 @@ export default function ContactPage() {
       <section className="py-20 bg-muted/30">
         <div className="container mx-auto px-4 text-center">
           <div className="max-w-3xl mx-auto scroll-animate opacity-0 translate-y-8">
-            <h2 className="text-4xl md:text-5xl font-bold mb-6">Ready to Get Started?</h2>
+            <h2 className="text-4xl md:text-5xl font-bold mb-6">Ready to Ace Your MBA Placements?</h2>
             <p className="text-xl text-muted-foreground mb-8">
-              Don't wait - join thousands of satisfied customers who have transformed their businesses with our
-              platform.
+              Don't wait - join thousands of MBA students who have successfully cracked their dream placements with our
+              comprehensive preparation program.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" className="group hover:scale-105 transition-all duration-300">
-                Start Free Trial
-                <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
-              </Button>
-              <Button size="lg" variant="outline" className="hover:scale-105 transition-transform bg-transparent">
-                Schedule a Demo
-              </Button>
+              <Link href="/courses">
+                <Button size="lg" className="group hover:scale-105 transition-all duration-300">
+                  Start Your MBA Placement Journey
+                  <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                </Button>
+              </Link>
             </div>
           </div>
         </div>

@@ -4,8 +4,9 @@ import { GeistSans } from "geist/font/sans"
 import { GeistMono } from "geist/font/mono"
 import { Analytics } from "@vercel/analytics/next"
 import "./globals.css"
-import { AuthProvider } from "@/contexts/auth-context"
+import { AuthProviderWrapper } from "@/components/auth-provider-wrapper"
 import { WhatsAppFloat } from "@/components/whatsapp-float"
+import { Navigation } from "@/components/navigation"
 import { Suspense } from "react"
 
 export const metadata: Metadata = {
@@ -13,6 +14,9 @@ export const metadata: Metadata = {
   description: "Master your MBA placements and internships with Placement Pulse. Get expert guidance, mock interviews, GD practice, and placement strategy from MBA alumni.",
   generator: "Placement Pulse",
 }
+
+// Disable static generation to prevent SSR issues with AuthProvider
+export const dynamic = 'force-dynamic'
 
 export default function RootLayout({
   children,
@@ -23,7 +27,10 @@ export default function RootLayout({
     <html lang="en">
       <body className={`font-sans ${GeistSans.variable} ${GeistMono.variable}`}>
         <Suspense fallback={<div>Loading...</div>}>
-          <AuthProvider>{children}</AuthProvider>
+          <AuthProviderWrapper>
+            <Navigation />
+            {children}
+          </AuthProviderWrapper>
         </Suspense>
         <WhatsAppFloat />
         <Analytics />

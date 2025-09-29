@@ -20,6 +20,38 @@
   animation-play-state: paused;
 }
 
+/* Smooth infinite scroll container */
+.smooth-scroll-container {
+  will-change: transform;
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  -webkit-perspective: 1000;
+  perspective: 1000;
+  transition: transform 0.1s ease-out;
+}
+
+/* Drag cursor states */
+.cursor-grab {
+  cursor: grab;
+}
+
+.cursor-grabbing {
+  cursor: grabbing;
+}
+
+/* Smooth drag experience */
+.smooth-scroll-container:active {
+  cursor: grabbing;
+}
+
+/* Touch improvements */
+.touch-pan-x {
+  touch-action: pan-x;
+  -webkit-overflow-scrolling: touch;
+}
+
 /* Smooth transition for seamless loop */
 .animate-scroll {
   animation-timing-function: linear;

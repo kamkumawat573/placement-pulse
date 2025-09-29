@@ -2,6 +2,8 @@ import { NextRequest } from "next/server"
 import { connectToDatabase } from "@/lib/mongodb"
 import { VideoModel } from "@/lib/models/Video"
 
+export const dynamic = 'force-dynamic'
+
 export async function GET(request: NextRequest) {
   try {
     await connectToDatabase()
@@ -9,7 +11,7 @@ export async function GET(request: NextRequest) {
     const featured = searchParams.get('featured')
     const category = searchParams.get('category')
     
-    let query = { isActive: true }
+    let query: any = { isActive: true }
     if (featured === 'true') {
       query = { ...query, isFeatured: true }
     }

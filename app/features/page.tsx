@@ -185,7 +185,7 @@ export default function FeaturesPage() {
                   <div className="text-xs text-muted-foreground mt-1">Gain real-world exposure before stepping into the actual placement rounds.</div>
                 </div>
                 <div className="text-center p-3 xs:p-4 bg-card rounded-lg border">
-                  <div className="text-2xl xs:text-3xl font-bold text-accent mb-1 xs:mb-2">₹99</div>
+                  <div className="text-2xl xs:text-3xl font-bold text-accent mb-1 xs:mb-2">₹299</div>
                   <div className="text-xs xs:text-sm text-muted-foreground">Starting Course Fee</div>
                   <div className="text-xs text-muted-foreground mt-1">Affordable, high-impact mentorship accessible to every MBA student.</div>
                 </div>

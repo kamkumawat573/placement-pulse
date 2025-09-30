@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Clock, User, Tag, Calendar, ArrowRight, Search, Filter, Star, Users, Play, Award } from "lucide-react"
+import { Clock, User, Tag, Calendar, ArrowRight, Search, Filter, Star, Users, Play, Award, RefreshCw } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import Link from "next/link"
 import { Navigation } from "@/components/navigation"
@@ -39,6 +39,7 @@ export default function CoursesPage() {
   const user = authContext?.user || null
   const [courses, setCourses] = useState<Course[]>([])
   const [loading, setLoading] = useState(true)
+  const [refreshing, setRefreshing] = useState(false)
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("all")
 
@@ -46,9 +47,19 @@ export default function CoursesPage() {
     fetchCourses()
   }, [])
 
-  const fetchCourses = async () => {
+  const fetchCourses = async (isManualRefresh = false) => {
+    if (isManualRefresh) {
+      setRefreshing(true)
+    }
+    
     try {
-      const response = await fetch('/api/courses')
+      const response = await fetch('/api/courses', {
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache'
+        }
+      })
       if (response.ok) {
         const data = await response.json()
         setCourses(data.courses || [])
@@ -57,7 +68,14 @@ export default function CoursesPage() {
       console.error('Error fetching courses:', error)
     } finally {
       setLoading(false)
+      if (isManualRefresh) {
+        setRefreshing(false)
+      }
     }
+  }
+
+  const handleManualRefresh = () => {
+    fetchCourses(true)
   }
 
   const filteredCourses = courses.filter(course => {
@@ -84,9 +102,21 @@ export default function CoursesPage() {
                 🎓 Our Courses
               </Badge>
             </div>
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 bg-clip-text text-transparent">
-              Master New Skills
-            </h1>
+            <div className="flex items-center justify-center gap-4 mb-4">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 bg-clip-text text-transparent">
+                Master New Skills
+              </h1>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleManualRefresh}
+                disabled={refreshing}
+                className="flex items-center gap-2"
+              >
+                <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
+                {refreshing ? 'Refreshing...' : 'Refresh'}
+              </Button>
+            </div>
             <p className="text-lg text-gray-600 dark:text-gray-300 mb-6">
               Learn from industry experts with our comprehensive course collection
             </p>
@@ -197,7 +227,7 @@ export default function CoursesPage() {
 
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center gap-1">
-                        <span className="text-lg font-bold text-blue-600">₹{course.price ? (Number(course.price) / 100).toFixed(0) : '299'}</span>
+                        <span className="text-lg font-bold text-blue-600">₹{course.price ? (Number(course.price) / 100).toFixed(0) : 'Loading...'}</span>
                         {course.originalPrice && Number(course.originalPrice) > Number(course.price) && (
                           <span className="text-sm text-gray-500 line-through">₹{(Number(course.originalPrice) / 100).toFixed(0)}</span>
                         )}

@@ -156,7 +156,13 @@ export default function HomePage() {
 
           const loadCourse = async () => {
             try {
-              const res = await fetch("/api/courses", { cache: "no-store" })
+              const res = await fetch("/api/courses", { 
+                cache: "no-store",
+                headers: {
+                  'Cache-Control': 'no-cache',
+                  'Pragma': 'no-cache'
+                }
+              })
               if (res.ok) {
                 const data = await res.json()
                 // Get the first active course or featured course
@@ -220,7 +226,7 @@ export default function HomePage() {
                   ) : (
                     <Link href={user ? "/enroll" : "/auth?mode=signup"}>
                       <Button size="lg" className="group font-bold text-xl px-10 py-6 bg-black hover:bg-gray-800 text-white shadow-2xl hover:shadow-black/50 hover:scale-110 hover:-translate-y-1 transition-all duration-500 border-2 border-gray-300 hover:border-white rounded-lg">
-                        Enroll Now {course ? `- ${formatPrice(course.price)}` : '- ₹99'}
+                        Enroll Now {course ? `- ${formatPrice(course.price)}` : course === null ? ' - Loading...' : ''}
                         <ArrowRight className="ml-4 h-6 w-6 group-hover:translate-x-2 group-hover:rotate-12 transition-all duration-300" />
                       </Button>
                     </Link>
@@ -868,7 +874,7 @@ export default function HomePage() {
               ) : (
                 <Link href={user ? "/enroll" : "/auth?mode=signup"}>
                   <Button size="lg" className="group font-bold text-xl px-10 py-6 bg-black hover:bg-gray-800 text-white shadow-2xl hover:shadow-black/50 hover:scale-110 hover:-translate-y-1 transition-all duration-500 border-2 border-gray-300 hover:border-white rounded-lg w-full sm:w-auto">
-                    Enroll Now {course ? `- ${formatPrice(course.price)}` : '- ₹299'}
+                    Enroll Now {course ? `- ${formatPrice(course.price)}` : course === null ? ' - Loading...' : ''}
                     <ArrowRight className="ml-4 h-6 w-6 group-hover:translate-x-2 group-hover:rotate-12 transition-all duration-300" />
                   </Button>
                 </Link>

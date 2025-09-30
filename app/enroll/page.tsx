@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
 import { useAuth } from "@/contexts/auth-context"
-import { CheckCircle, CreditCard, Clock, Users, Award, Loader2 } from "lucide-react"
+import { CheckCircle, CreditCard, Clock, Users, Award, Loader2, RefreshCw } from "lucide-react"
 
 // Course features will be fetched dynamically from the course data
 
@@ -19,15 +19,17 @@ export default function EnrollPage() {
   const router = useRouter()
   const [mounted, setMounted] = useState(false)
   const [processing, setProcessing] = useState(false)
-  const [coursePrice, setCoursePrice] = useState(29900) // Default price in paise
+  const [refreshing, setRefreshing] = useState(false)
+  const [coursePrice, setCoursePrice] = useState(0) // Will be updated from API
   const [courseId, setCourseId] = useState("") // Store actual course ID
+  const [courseDataLoaded, setCourseDataLoaded] = useState(false)
   const [courseInfo, setCourseInfo] = useState({
     title: "MBA Placement Mastery Program",
     description: "Master Group Discussions, Interviews, and Placement Strategies with expert guidance from MBA alumni",
     shortDescription: "Comprehensive MBA placement preparation course",
-    price: 299,
-    originalPrice: 599,
-    discount: "50% OFF",
+    price: 0, // Will be updated from API
+    originalPrice: 0, // Will be updated from API
+    discount: "", // Will be updated from API
     duration: "40+ Hours",
     level: "Beginner to Advanced",
     category: "MBA Placements",
@@ -50,10 +52,20 @@ export default function EnrollPage() {
     reviews: "150+"
   })
 
-  const fetchCourseData = async () => {
+  const fetchCourseData = async (isManualRefresh = false) => {
+    if (isManualRefresh) {
+      setRefreshing(true)
+    }
+    
     try {
-      // Fetch the first active course from the admin panel
-      const response = await fetch(`/api/courses?t=${Date.now()}`)
+      // Fetch the first active course from the admin panel with cache busting
+      const response = await fetch(`/api/courses?t=${Date.now()}`, {
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache'
+        }
+      })
       if (response.ok) {
         const data = await response.json()
         if (data.courses && data.courses.length > 0) {
@@ -86,17 +98,32 @@ export default function EnrollPage() {
             displayPrice: course.price / 100,
             features: course.features?.length || 0
           })
+          setCourseDataLoaded(true)
         }
       }
     } catch (error) {
       console.error('Error fetching course data:', error)
       // Keep default values if fetch fails
+    } finally {
+      if (isManualRefresh) {
+        setRefreshing(false)
+      }
     }
+  }
+
+  const handleManualRefresh = () => {
+    fetchCourseData(true)
   }
 
   useEffect(() => {
     setMounted(true)
     fetchCourseData()
+    
+    // Set up periodic refresh for course data (every 30 seconds)
+    const interval = setInterval(() => {
+      fetchCourseData()
+    }, 30000)
+    
     // Load Razorpay Checkout script
     const script = document.createElement("script")
     script.src = "https://checkout.razorpay.com/v1/checkout.js"
@@ -106,6 +133,16 @@ export default function EnrollPage() {
       router.push("/auth")
     } else if (user.enrolledCourse) {
       router.push("/dashboard")
+    }
+
+    return () => {
+      // Cleanup interval
+      clearInterval(interval)
+      // Cleanup Razorpay script
+      const existingScript = document.getElementById('razorpay-checkout-script')
+      if (existingScript) {
+        existingScript.remove()
+      }
     }
   }, [user, router])
 
@@ -243,7 +280,9 @@ export default function EnrollPage() {
                     <div className="flex items-center justify-between text-lg">
                       <span>Course Price</span>
                       <div className="flex items-center gap-2">
-                        <span className="font-bold">₹{courseInfo.price}</span>
+                        <span className="font-bold">
+                          {courseDataLoaded ? `₹${courseInfo.price}` : 'Loading...'}
+                        </span>
                         {courseInfo.originalPrice && courseInfo.originalPrice > courseInfo.price && (
                           <span className="text-sm text-gray-500 line-through">₹{courseInfo.originalPrice}</span>
                         )}
@@ -252,6 +291,15 @@ export default function EnrollPage() {
                             {courseInfo.discount}
                           </span>
                         )}
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={handleManualRefresh}
+                          disabled={refreshing}
+                          className="ml-2"
+                        >
+                          <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
+                        </Button>
                       </div>
                     </div>
                     <Separator />
@@ -339,7 +387,7 @@ export default function EnrollPage() {
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
                       <span>Course Price</span>
-                      <span>₹{courseInfo.price}.00</span>
+                      <span>{courseDataLoaded ? `₹${courseInfo.price}.00` : 'Loading...'}</span>
                     </div>
                     <div className="flex items-center justify-between">
                       <span>Tax</span>
@@ -348,20 +396,25 @@ export default function EnrollPage() {
                     <Separator />
                     <div className="flex items-center justify-between text-lg font-bold">
                       <span>Total</span>
-                      <span>₹{courseInfo.price}.00</span>
+                      <span>{courseDataLoaded ? `₹${courseInfo.price}.00` : 'Loading...'}</span>
                     </div>
                   </div>
 
-                  <Button onClick={handleEnrollment} disabled={processing} className="w-full mt-2" size="lg">
+                  <Button onClick={handleEnrollment} disabled={processing || !courseDataLoaded} className="w-full mt-2" size="lg">
                     {processing ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                         Redirecting to Razorpay...
                       </>
+                    ) : !courseDataLoaded ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Loading Course Details...
+                      </>
                     ) : (
                       <>
                         <CreditCard className="mr-2 h-4 w-4" />
-                        Enroll in MBA Placement Program
+                        Enroll Now - ₹{courseInfo.price}
                       </>
                     )}
                   </Button>

@@ -2,13 +2,15 @@ import { NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/mongodb';
 import { CourseModel } from '@/lib/models/Course';
 
+export const dynamic = 'force-dynamic'
+
 export async function GET(request: NextRequest) {
   try {
     await connectToDatabase();
 
     const courses = await CourseModel.find({ isActive: true }).sort({ createdAt: -1 });
     
-    return NextResponse.json({
+    const response = NextResponse.json({
       success: true,
       courses: courses.map(course => ({
         id: course._id,
@@ -33,6 +35,14 @@ export async function GET(request: NextRequest) {
         updatedAt: course.updatedAt
       }))
     });
+
+    // Add cache control headers to prevent caching
+    response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    response.headers.set('Pragma', 'no-cache');
+    response.headers.set('Expires', '0');
+    response.headers.set('Surrogate-Control', 'no-store');
+
+    return response;
   } catch (error) {
     console.error('Fetch courses error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

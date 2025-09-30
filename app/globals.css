@@ -20,6 +20,56 @@
   animation-play-state: paused;
 }
 
+/* Fast scroll animation */
+@keyframes scroll-fast {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-scroll-fast {
+  animation: scroll-fast 15s linear infinite;
+  will-change: transform;
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  -webkit-perspective: 1000;
+  perspective: 1000;
+}
+
+.animate-scroll-fast:hover {
+  animation-play-state: paused;
+}
+
+/* Super fast scroll animation */
+@keyframes scroll-super-fast {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-scroll-super-fast {
+  animation: scroll-super-fast 10s linear infinite;
+  will-change: transform;
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  -webkit-perspective: 1000;
+  perspective: 1000;
+}
+
+.animate-scroll-super-fast:hover {
+  animation-play-state: paused;
+}
+
 /* Smooth infinite scroll container */
 .smooth-scroll-container {
   will-change: transform;

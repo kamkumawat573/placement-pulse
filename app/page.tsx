@@ -367,8 +367,8 @@ export default function HomePage() {
           </div>
           
           {/* Auto-scrolling logos container */}
-          <div className="relative">
-            <div className="flex animate-scroll">
+          <div className="relative overflow-hidden">
+            <div className="flex animate-scroll-super-fast">
               {/* First set of logos */}
               <div className="flex items-center gap-8 sm:gap-12 lg:gap-16 flex-shrink-0">
                 {/* IIM Indore */}

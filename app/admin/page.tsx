@@ -18,6 +18,8 @@ import {
   LogOut,
   Eye,
   Edit,
+  CheckCircle,
+  Heart,
   Trash2,
   Plus,
   BookOpen,
@@ -286,7 +288,42 @@ export default function AdminDashboard() {
   const [messagePriority, setMessagePriority] = useState<'all' | 'low' | 'medium' | 'high' | 'urgent'>('all');
   const [updatingMessage, setUpdatingMessage] = useState(false);
   const [messageNotes, setMessageNotes] = useState('');
+  
+  // GD Topics state
+  const [gdTopics, setGdTopics] = useState<any[]>([]);
+  const [showCreateGDTopic, setShowCreateGDTopic] = useState(false);
+  const [editingGDTopic, setEditingGDTopic] = useState<any>(null);
+  const [newGDTopic, setNewGDTopic] = useState({
+    title: '',
+    description: '',
+    category: 'Business',
+    difficulty: 'Medium',
+    tags: '',
+    discussionPoints: '',
+    tips: '',
+    relatedTopics: '',
+    imageUrl: '',
+    isTrending: false
+  });
+  const [creatingGDTopic, setCreatingGDTopic] = useState(false);
+  const [gdTopicSearch, setGdTopicSearch] = useState('');
+  const [gdTopicFilter, setGdTopicFilter] = useState('all');
   const router = useRouter();
+
+  // Filtered GD topics
+  const filteredGdTopics = gdTopics.filter(topic => {
+    const matchesSearch = !gdTopicSearch || 
+      topic.title.toLowerCase().includes(gdTopicSearch.toLowerCase()) ||
+      topic.description.toLowerCase().includes(gdTopicSearch.toLowerCase()) ||
+      topic.category.toLowerCase().includes(gdTopicSearch.toLowerCase());
+    
+    const matchesFilter = gdTopicFilter === 'all' ||
+      (gdTopicFilter === 'trending' && topic.isTrending) ||
+      (gdTopicFilter === 'active' && topic.isActive) ||
+      (gdTopicFilter === 'inactive' && !topic.isActive);
+    
+    return matchesSearch && matchesFilter;
+  });
 
   useEffect(() => {
     checkAdminAuth();
@@ -298,6 +335,7 @@ export default function AdminDashboard() {
     fetchVideos();
     fetchSettings();
     fetchMessages();
+    fetchGDTopics();
   }, []);
 
   const checkAdminAuth = async () => {
@@ -495,6 +533,173 @@ export default function AdminDashboard() {
       }
     } catch (error) {
       console.error('Failed to fetch videos:', error);
+    }
+  };
+
+  const fetchGDTopics = async () => {
+    try {
+      const response = await fetch('/api/admin/gd-topics');
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          setGdTopics(data.topics || []);
+        } else {
+          console.error('Failed to fetch GD topics:', data.error);
+          setGdTopics([]);
+        }
+      } else {
+        console.error('Failed to fetch GD topics:', response.status);
+        setGdTopics([]);
+      }
+    } catch (error) {
+      console.error('Failed to fetch GD topics:', error);
+      setGdTopics([]);
+    }
+  };
+
+  const createGDTopic = async () => {
+    if (!newGDTopic.title.trim()) {
+      alert('Title is required');
+      return;
+    }
+    if (!newGDTopic.description.trim()) {
+      alert('Description is required');
+      return;
+    }
+
+    setCreatingGDTopic(true);
+    try {
+      const response = await fetch('/api/admin/gd-topics', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newGDTopic)
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          alert('GD topic created successfully!');
+          setNewGDTopic({
+            title: '',
+            description: '',
+            category: 'Business',
+            difficulty: 'Medium',
+            tags: '',
+            discussionPoints: '',
+            tips: '',
+            relatedTopics: '',
+            imageUrl: '',
+            isTrending: false
+          });
+          setShowCreateGDTopic(false);
+          fetchGDTopics();
+        } else {
+          alert(data.error || 'Failed to create GD topic');
+        }
+      } else {
+        const error = await response.json();
+        alert(error.error || 'Failed to create GD topic');
+      }
+    } catch (error) {
+      console.error('Failed to create GD topic:', error);
+      alert('Failed to create GD topic');
+    } finally {
+      setCreatingGDTopic(false);
+    }
+  };
+
+  const updateGDTopic = async () => {
+    if (!newGDTopic.title.trim()) {
+      alert('Title is required');
+      return;
+    }
+    if (!newGDTopic.description.trim()) {
+      alert('Description is required');
+      return;
+    }
+
+    setCreatingGDTopic(true);
+    try {
+      const response = await fetch(`/api/admin/gd-topics/${editingGDTopic._id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newGDTopic)
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          alert('GD topic updated successfully!');
+          setNewGDTopic({
+            title: '',
+            description: '',
+            category: 'Business',
+            difficulty: 'Medium',
+            tags: '',
+            discussionPoints: '',
+            tips: '',
+            relatedTopics: '',
+            imageUrl: '',
+            isTrending: false
+          });
+          setShowCreateGDTopic(false);
+          setEditingGDTopic(null);
+          fetchGDTopics();
+        } else {
+          alert(data.error || 'Failed to update GD topic');
+        }
+      } else {
+        const error = await response.json();
+        alert(error.error || 'Failed to update GD topic');
+      }
+    } catch (error) {
+      console.error('Failed to update GD topic:', error);
+      alert('Failed to update GD topic');
+    } finally {
+      setCreatingGDTopic(false);
+    }
+  };
+
+  const handleEditGDTopic = (topic: any) => {
+    setEditingGDTopic(topic);
+    setNewGDTopic({
+      title: topic.title,
+      description: topic.description,
+      category: topic.category,
+      difficulty: topic.difficulty,
+      tags: topic.tags.join(', '),
+      discussionPoints: topic.discussionPoints.join('\n'),
+      tips: topic.tips.join('\n'),
+      relatedTopics: topic.relatedTopics.join(', '),
+      imageUrl: topic.imageUrl || '',
+      isTrending: topic.isTrending
+    });
+    setShowCreateGDTopic(true);
+  };
+
+  const handleDeleteGDTopic = async (id: string) => {
+    if (confirm('Are you sure you want to delete this GD topic?')) {
+      try {
+        const response = await fetch(`/api/admin/gd-topics/${id}`, {
+          method: 'DELETE'
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success) {
+            alert('GD topic deleted successfully!');
+            fetchGDTopics();
+          } else {
+            alert(data.error || 'Failed to delete GD topic');
+          }
+        } else {
+          const error = await response.json();
+          alert(error.error || 'Failed to delete GD topic');
+        }
+      } catch (error) {
+        console.error('Failed to delete GD topic:', error);
+        alert('Failed to delete GD topic');
+      }
     }
   };
 
@@ -1571,7 +1776,7 @@ export default function AdminDashboard() {
         {/* Main Content */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-3 sm:space-y-4 lg:space-y-6">
           <div className="overflow-x-auto">
-            <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-8 h-auto min-w-max">
+            <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-9 h-auto min-w-max">
               <TabsTrigger value="students" className="text-xs sm:text-sm px-2 sm:px-3 py-2">
                 <Users className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
                 <span className="hidden sm:inline">Students</span>
@@ -1581,6 +1786,11 @@ export default function AdminDashboard() {
                 <GraduationCap className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
                 <span className="hidden sm:inline">Courses</span>
                 <span className="sm:hidden">Courses</span>
+              </TabsTrigger>
+              <TabsTrigger value="gd-topics" className="text-xs sm:text-sm px-2 sm:px-3 py-2">
+                <MessageSquare className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                <span className="hidden sm:inline">GD Topics</span>
+                <span className="sm:hidden">GD</span>
               </TabsTrigger>
               <TabsTrigger value="announcements" className="text-xs sm:text-sm px-2 sm:px-3 py-2">
                 <Megaphone className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
@@ -3750,6 +3960,201 @@ export default function AdminDashboard() {
               </CardContent>
             </Card>
           </TabsContent>
+
+          <TabsContent value="gd-topics" className="space-y-3 sm:space-y-4 lg:space-y-6">
+            {/* GD Topics Management */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <MessageSquare className="h-5 w-5" />
+                  GD Topics Management
+                </CardTitle>
+                <CardDescription>
+                  Create and manage daily trending GD topics for MBA students
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-6">
+                  {/* Stats and Actions */}
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div className="bg-blue-50 p-4 rounded-lg">
+                      <div className="flex items-center gap-2">
+                        <MessageSquare className="h-5 w-5 text-blue-600" />
+                        <div>
+                          <p className="text-sm text-gray-600">Total Topics</p>
+                          <p className="text-2xl font-bold text-blue-600">{gdTopics.length}</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="bg-orange-50 p-4 rounded-lg">
+                      <div className="flex items-center gap-2">
+                        <TrendingUp className="h-5 w-5 text-orange-600" />
+                        <div>
+                          <p className="text-sm text-gray-600">Trending</p>
+                          <p className="text-2xl font-bold text-orange-600">
+                            {gdTopics.filter(t => t.isTrending).length}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="bg-green-50 p-4 rounded-lg">
+                      <div className="flex items-center gap-2">
+                        <CheckCircle className="h-5 w-5 text-green-600" />
+                        <div>
+                          <p className="text-sm text-gray-600">Active</p>
+                          <p className="text-2xl font-bold text-green-600">
+                            {gdTopics.filter(t => t.isActive).length}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Search and Filter */}
+                  <div className="flex flex-col sm:flex-row gap-4">
+                    <div className="flex-1">
+                      <Input
+                        placeholder="Search topics..."
+                        value={gdTopicSearch}
+                        onChange={(e) => setGdTopicSearch(e.target.value)}
+                        className="w-full"
+                      />
+                    </div>
+                    <div className="flex gap-2">
+                      <select
+                        value={gdTopicFilter}
+                        onChange={(e) => setGdTopicFilter(e.target.value)}
+                        className="px-3 py-2 border border-gray-300 rounded-md text-sm"
+                      >
+                        <option value="all">All Topics</option>
+                        <option value="trending">Trending Only</option>
+                        <option value="active">Active Only</option>
+                        <option value="inactive">Inactive Only</option>
+                      </select>
+                      <Button 
+                        onClick={() => setShowCreateGDTopic(true)}
+                        className="bg-blue-600 hover:bg-blue-700 text-white"
+                      >
+                        <Plus className="h-4 w-4 mr-2" />
+                        Create Topic
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* Topics List */}
+                  <div className="space-y-3">
+                    {filteredGdTopics.length === 0 ? (
+                      <div className="text-center py-12 text-gray-500">
+                        <MessageSquare className="h-16 w-16 mx-auto mb-4 text-gray-300" />
+                        <h3 className="text-lg font-semibold mb-2">No GD Topics Found</h3>
+                        <p className="text-sm mb-4">
+                          {gdTopicSearch || gdTopicFilter !== 'all' 
+                            ? 'Try adjusting your search or filter criteria'
+                            : 'Create your first GD topic to get started!'
+                          }
+                        </p>
+                        {!gdTopicSearch && gdTopicFilter === 'all' && (
+                          <Button 
+                            onClick={() => setShowCreateGDTopic(true)}
+                            className="bg-blue-600 hover:bg-blue-700 text-white"
+                          >
+                            <Plus className="h-4 w-4 mr-2" />
+                            Create Your First Topic
+                          </Button>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="grid gap-4">
+                        {filteredGdTopics.map((topic) => (
+                          <div key={topic._id} className="border rounded-lg p-6 bg-white hover:shadow-md transition-shadow">
+                            <div className="flex items-start justify-between">
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2 mb-3">
+                                  <Badge className="text-xs bg-blue-100 text-blue-800">
+                                    {topic.category}
+                                  </Badge>
+                                  <Badge className={`text-xs ${
+                                    topic.difficulty === 'Easy' ? 'bg-green-100 text-green-800' :
+                                    topic.difficulty === 'Medium' ? 'bg-yellow-100 text-yellow-800' :
+                                    'bg-red-100 text-red-800'
+                                  }`}>
+                                    {topic.difficulty}
+                                  </Badge>
+                                  {topic.isTrending && (
+                                    <Badge className="text-xs bg-orange-100 text-orange-800">
+                                      <TrendingUp className="mr-1 h-3 w-3" />
+                                      Trending
+                                    </Badge>
+                                  )}
+                                  {!topic.isActive && (
+                                    <Badge className="text-xs bg-red-100 text-red-800">
+                                      Inactive
+                                    </Badge>
+                                  )}
+                                </div>
+                                
+                                <h4 className="font-semibold text-xl mb-2 text-gray-900">{topic.title}</h4>
+                                <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+                                  {topic.description}
+                                </p>
+                                
+                                {topic.tags && topic.tags.length > 0 && (
+                                  <div className="flex flex-wrap gap-1 mb-3">
+                                    {topic.tags.slice(0, 3).map((tag: string, index: number) => (
+                                      <Badge key={index} variant="secondary" className="text-xs">
+                                        {tag}
+                                      </Badge>
+                                    ))}
+                                    {topic.tags.length > 3 && (
+                                      <Badge variant="secondary" className="text-xs">
+                                        +{topic.tags.length - 3} more
+                                      </Badge>
+                                    )}
+                                  </div>
+                                )}
+                                
+                                <div className="flex items-center gap-6 text-xs text-gray-500">
+                                  <div className="flex items-center gap-1">
+                                    <Calendar className="h-3 w-3" />
+                                    <span>{new Date(topic.createdAt).toLocaleDateString()}</span>
+                                  </div>
+                                  <div className="flex items-center gap-1">
+                                    <Heart className="h-3 w-3" />
+                                    <span>{topic.likes || 0} likes</span>
+                                  </div>
+                                </div>
+                              </div>
+                              
+                              <div className="flex gap-2 ml-4">
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => handleEditGDTopic(topic)}
+                                  className="hover:bg-blue-50"
+                                >
+                                  <Edit className="h-4 w-4 mr-1" />
+                                  Edit
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => handleDeleteGDTopic(topic._id)}
+                                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                >
+                                  <Trash2 className="h-4 w-4 mr-1" />
+                                  Delete
+                                </Button>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
         </Tabs>
       </div>
 
@@ -4158,6 +4563,204 @@ export default function AdminDashboard() {
               >
                 {resettingRevenue ? 'Resetting...' : 'Reset Revenue'}
               </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* GD Topic Create/Edit Modal */}
+      {showCreateGDTopic && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-bold">
+                  {editingGDTopic ? 'Edit GD Topic' : 'Create New GD Topic'}
+                </h2>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setShowCreateGDTopic(false);
+                    setEditingGDTopic(null);
+                    setNewGDTopic({
+                      title: '',
+                      description: '',
+                      category: 'Business',
+                      difficulty: 'Medium',
+                      tags: '',
+                      discussionPoints: '',
+                      tips: '',
+                      relatedTopics: '',
+                      imageUrl: '',
+                      isTrending: false
+                    });
+                  }}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+
+              <div className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="title">Title *</Label>
+                    <Input
+                      id="title"
+                      value={newGDTopic.title}
+                      onChange={(e) => setNewGDTopic({...newGDTopic, title: e.target.value})}
+                      placeholder="Enter GD topic title"
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="category">Category *</Label>
+                    <select
+                      id="category"
+                      value={newGDTopic.category}
+                      onChange={(e) => setNewGDTopic({...newGDTopic, category: e.target.value})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                      required
+                    >
+                      <option value="Business">Business</option>
+                      <option value="Technology">Technology</option>
+                      <option value="Social Issues">Social Issues</option>
+                      <option value="Economics">Economics</option>
+                      <option value="Politics">Politics</option>
+                      <option value="Environment">Environment</option>
+                      <option value="Education">Education</option>
+                      <option value="Healthcare">Healthcare</option>
+                      <option value="Sports">Sports</option>
+                      <option value="Entertainment">Entertainment</option>
+                      <option value="General Knowledge">General Knowledge</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="description">Description *</Label>
+                  <textarea
+                    id="description"
+                    value={newGDTopic.description}
+                    onChange={(e) => setNewGDTopic({...newGDTopic, description: e.target.value})}
+                    placeholder="Enter topic description"
+                    rows={3}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                    required
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="difficulty">Difficulty</Label>
+                    <select
+                      id="difficulty"
+                      value={newGDTopic.difficulty}
+                      onChange={(e) => setNewGDTopic({...newGDTopic, difficulty: e.target.value})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                    >
+                      <option value="Easy">Easy</option>
+                      <option value="Medium">Medium</option>
+                      <option value="Hard">Hard</option>
+                    </select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="imageUrl">Image URL (Optional)</Label>
+                    <Input
+                      id="imageUrl"
+                      value={newGDTopic.imageUrl}
+                      onChange={(e) => setNewGDTopic({...newGDTopic, imageUrl: e.target.value})}
+                      placeholder="Enter image URL"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="tags">Tags (comma-separated)</Label>
+                  <Input
+                    id="tags"
+                    value={newGDTopic.tags}
+                    onChange={(e) => setNewGDTopic({...newGDTopic, tags: e.target.value})}
+                    placeholder="e.g., technology, innovation, business"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="discussionPoints">Discussion Points (one per line)</Label>
+                  <textarea
+                    id="discussionPoints"
+                    value={newGDTopic.discussionPoints}
+                    onChange={(e) => setNewGDTopic({...newGDTopic, discussionPoints: e.target.value})}
+                    placeholder="Enter discussion points, one per line"
+                    rows={3}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="tips">Tips (one per line)</Label>
+                  <textarea
+                    id="tips"
+                    value={newGDTopic.tips}
+                    onChange={(e) => setNewGDTopic({...newGDTopic, tips: e.target.value})}
+                    placeholder="Enter tips, one per line"
+                    rows={3}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="relatedTopics">Related Topics (comma-separated)</Label>
+                  <Input
+                    id="relatedTopics"
+                    value={newGDTopic.relatedTopics}
+                    onChange={(e) => setNewGDTopic({...newGDTopic, relatedTopics: e.target.value})}
+                    placeholder="e.g., Digital Transformation, AI Ethics"
+                  />
+                </div>
+
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    id="isTrending"
+                    checked={newGDTopic.isTrending}
+                    onChange={(e) => setNewGDTopic({...newGDTopic, isTrending: e.target.checked})}
+                    className="rounded"
+                  />
+                  <Label htmlFor="isTrending">Mark as Trending</Label>
+                </div>
+
+                <div className="flex gap-4">
+                  <Button
+                    onClick={editingGDTopic ? updateGDTopic : createGDTopic}
+                    disabled={creatingGDTopic}
+                    className="bg-blue-600 hover:bg-blue-700 text-white"
+                  >
+                    {creatingGDTopic ? 'Saving...' : (editingGDTopic ? 'Update Topic' : 'Create Topic')}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setShowCreateGDTopic(false);
+                      setEditingGDTopic(null);
+                      setNewGDTopic({
+                        title: '',
+                        description: '',
+                        category: 'Business',
+                        difficulty: 'Medium',
+                        tags: '',
+                        discussionPoints: '',
+                        tips: '',
+                        relatedTopics: '',
+                        imageUrl: '',
+                        isTrending: false
+                      });
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </div>
             </div>
           </div>
         </div>

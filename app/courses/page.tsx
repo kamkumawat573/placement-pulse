@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Clock, User, Tag, Calendar, ArrowRight, Search, Filter, Star, Users, Play, Award, RefreshCw } from "lucide-react"
+import { CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import Link from "next/link"
 import { Navigation } from "@/components/navigation"
@@ -93,6 +94,7 @@ export default function CoursesPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-purple-50/30 dark:from-slate-900 dark:to-slate-800">
+      <Navigation />
       {/* Hero Section */}
       <section className="py-12 sm:py-16 pt-20 lg:pt-24 relative overflow-hidden">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
@@ -288,24 +290,197 @@ export default function CoursesPage() {
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="py-8 sm:py-12 relative overflow-hidden">
-        {/* Light Background Elements */}
-        <div className="absolute inset-0">
-          <div className="absolute top-10 left-10 w-20 h-20 bg-blue-200/30 rounded-full animate-float"></div>
-          <div className="absolute bottom-10 right-10 w-16 h-16 bg-purple-200/30 rounded-full animate-float" style={{animationDelay: '1s'}}></div>
-          <div className="absolute top-1/2 left-1/2 w-12 h-12 bg-cyan-200/30 rounded-full animate-pulse" style={{animationDelay: '2s'}}></div>
-        </div>
-        
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
-          <div className="max-w-2xl mx-auto">
-            <h2 className="text-2xl sm:text-3xl font-bold mb-4 bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 bg-clip-text text-transparent">
-              Start Learning Today
+
+      {/* Main Features Grid */}
+      <section className="py-12 sm:py-16 lg:py-20">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12 sm:mb-16">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 sm:mb-6 leading-tight">
+              Core Features
             </h2>
-            <p className="text-lg text-gray-600 dark:text-gray-300 mb-6">
-              Join thousands of students who have transformed their careers
+            <p className="text-lg sm:text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto leading-relaxed">
+              Comprehensive tools and resources designed to help you excel in MBA placements and internships.
             </p>
-           
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+            {[
+              {
+                icon: Award,
+                title: "Expert Mentorship",
+                description: "Learn from industry professionals and placement experts who have successfully guided hundreds of MBA students.",
+                color: "text-blue-600"
+              },
+              {
+                icon: Users,
+                title: "Mock GD & PI Sessions",
+                description: "Practice with real-time group discussions and personal interviews to build confidence and improve performance.",
+                color: "text-green-600"
+              },
+              {
+                icon: Play,
+                title: "Video Learning",
+                description: "Access comprehensive video content covering all aspects of placement preparation and interview techniques.",
+                color: "text-purple-600"
+              },
+              {
+                icon: Star,
+                title: "Resume & Profile Review",
+                description: "Get your resume and LinkedIn profile reviewed by experts to make them recruiter-ready.",
+                color: "text-orange-600"
+              },
+              {
+                icon: Clock,
+                title: "Flexible Learning",
+                description: "Study at your own pace with 24/7 access to all course materials and resources.",
+                color: "text-cyan-600"
+              },
+              {
+                icon: User,
+                title: "Personalized Guidance",
+                description: "Receive one-on-one mentorship and personalized feedback to address your specific needs.",
+                color: "text-pink-600"
+              }
+            ].map((feature, index) => (
+              <Card
+                key={index}
+                className="hover:scale-105 transition-all duration-300 hover:shadow-xl group p-6 bg-white border border-gray-200 shadow-md hover:shadow-lg"
+              >
+                <CardHeader className="pb-4">
+                  <feature.icon
+                    className={`h-10 w-10 sm:h-12 sm:w-12 ${feature.color} mb-4 group-hover:scale-110 transition-transform`}
+                  />
+                  <CardTitle className="text-xl leading-tight">{feature.title}</CardTitle>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  <CardDescription className="text-base leading-relaxed text-gray-600 dark:text-gray-300">{feature.description}</CardDescription>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Feature Showcase */}
+      <section className="py-12 sm:py-16 lg:py-20 bg-gray-50 dark:bg-gray-800/50">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid lg:grid-cols-2 gap-10 sm:gap-12 items-center">
+            <div>
+              <Badge className="mb-4 text-sm" variant="outline">
+                📊 Placement Success Metrics
+              </Badge>
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-6 leading-tight">Built for Your Internship & Placement Success</h2>
+              <p className="text-base sm:text-lg text-gray-600 dark:text-gray-300 mb-8 leading-relaxed">
+                Our structured courses and mentorship ensure you are fully prepared for every stage of the MBA placement journey. From mock GDs to resume polishing, we provide the right tools and guidance to help you land your dream offer.
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+                <div className="text-center p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
+                  <div className="text-3xl font-bold text-blue-600 mb-2">95%+</div>
+                  <div className="text-sm text-gray-600 dark:text-gray-300">Students Improved GD & PI Performance</div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">Proven results from our practice-based approach.</div>
+                </div>
+                <div className="text-center p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
+                  <div className="text-3xl font-bold text-blue-600 mb-2">500+</div>
+                  <div className="text-sm text-gray-600 dark:text-gray-300">Mock GDs & Interviews Conducted</div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">Gain real-world exposure before stepping into the actual placement rounds.</div>
+                </div>
+                <div className="text-center p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
+                  <div className="text-3xl font-bold text-blue-600 mb-2">₹299</div>
+                  <div className="text-sm text-gray-600 dark:text-gray-300">Starting Course Fee</div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">Affordable, high-impact mentorship accessible to every MBA student.</div>
+                </div>
+                <div className="text-center p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
+                  <div className="text-3xl font-bold text-blue-600 mb-2">20+</div>
+                  <div className="text-sm text-gray-600 dark:text-gray-300">Cities</div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">Trusted by students across top B-Schools in 20+ cities.</div>
+                </div>
+              </div>
+            </div>
+            <div>
+              <div className="relative">
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-100/50 to-purple-100/50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-2xl transform rotate-3" />
+                <div className="relative bg-white dark:bg-gray-800 p-6 sm:p-8 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-lg">
+                  <h3 className="text-2xl font-bold mb-6">Additional Capabilities</h3>
+                  <div className="space-y-4">
+                    <div className="flex items-start space-x-3 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                      <span className="text-lg">🎤</span>
+                      <div>
+                        <div className="font-semibold text-sm">Live GD Practice</div>
+                        <div className="text-sm text-gray-600 dark:text-gray-300">Participate in real-time GDs with alumni moderators.</div>
+                      </div>
+                    </div>
+                    <div className="flex items-start space-x-3 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                      <span className="text-lg">💼</span>
+                      <div>
+                        <div className="font-semibold text-sm">Mock Interviews</div>
+                        <div className="text-sm text-gray-600 dark:text-gray-300">Face one-on-one mock HR & technical interviews with detailed feedback.</div>
+                      </div>
+                    </div>
+                    <div className="flex items-start space-x-3 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                      <span className="text-lg">📄</span>
+                      <div>
+                        <div className="font-semibold text-sm">Resume & LinkedIn Review</div>
+                        <div className="text-sm text-gray-600 dark:text-gray-300">Get your profile recruiter-ready with expert reviews.</div>
+                      </div>
+                    </div>
+                    <div className="flex items-start space-x-3 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                      <span className="text-lg">📚</span>
+                      <div>
+                        <div className="font-semibold text-sm">Internship & Placement Strategy Sessions</div>
+                        <div className="text-sm text-gray-600 dark:text-gray-300">Step-by-step guidance to crack aptitude tests, shortlist companies, and prep smart.</div>
+                      </div>
+                    </div>
+                    <div className="flex items-start space-x-3 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                      <span className="text-lg">🤝</span>
+                      <div>
+                        <div className="font-semibold text-sm">Peer-to-Peer Learning</div>
+                        <div className="text-sm text-gray-600 dark:text-gray-300">Collaborate with fellow MBA students, exchange insights, and practice together.</div>
+                      </div>
+                    </div>
+                    <div className="flex items-start space-x-3 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                      <span className="text-lg">📝</span>
+                      <div>
+                        <div className="font-semibold text-sm">Weekly Blogs & Hacks</div>
+                        <div className="text-sm text-gray-600 dark:text-gray-300">Stay updated with placement trends, interview hacks, and success stories.</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="text-center mt-10 sm:mt-12">
+            <Link href="/courses">
+              <Button size="lg" className="group font-bold text-base sm:text-lg px-6 sm:px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-purple-600 hover:to-blue-600 text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 border-0 rounded-lg">
+                Start Your Placement Journey Today
+                <ArrowRight className="ml-3 h-5 w-5 group-hover:translate-x-2 group-hover:rotate-12 transition-all duration-300" />
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Final CTA Section */}
+      <section className="py-12 sm:py-16 lg:py-20">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <div className="max-w-3xl mx-auto">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-6 leading-tight">🚀 Ready to Ace Your MBA Internships & Placements?</h2>
+            <p className="text-lg sm:text-xl text-gray-600 dark:text-gray-300 mb-8 leading-relaxed">
+              Join hundreds of MBA students who are transforming their placement journey with Placement Pulse. Get the right guidance, practice, and confidence to land your dream role.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link href="/courses">
+                <Button size="lg" className="group font-bold text-base sm:text-lg px-6 sm:px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-purple-600 hover:to-blue-600 text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 border-0 rounded-lg">
+                  Start Preparing Today
+                  <ArrowRight className="ml-3 h-5 w-5 group-hover:translate-x-2 group-hover:rotate-12 transition-all duration-300" />
+                </Button>
+              </Link>
+              <Link href="/#video-section">
+                <Button size="lg" variant="outline" className="group hover:scale-105 transition-all duration-300 bg-transparent border-2 border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white text-base sm:text-lg px-6 sm:px-8 py-4">
+                  Watch Free Preview
+                  <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                </Button>
+              </Link>
+            </div>
           </div>
         </div>
       </section>

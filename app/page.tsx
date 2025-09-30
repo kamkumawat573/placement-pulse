@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
-import { ArrowRight, Play, Clock, Users, Award, Star, CheckCircle, Youtube, Instagram, Twitter, Linkedin } from "lucide-react"
+import { ArrowRight, Play, Clock, Users, Award, Star, CheckCircle, Youtube, Instagram, Linkedin } from "lucide-react"
 import Link from "next/link"
 import { useAuth } from "@/contexts/auth-context"
 
@@ -720,12 +720,6 @@ export default function HomePage() {
                   {videos[0].description && (
                     <p className="text-sm sm:text-base text-muted-foreground mb-3 sm:mb-4">{videos[0].description}</p>
                   )}
-                  {videos[0].duration && (
-                    <div className="flex items-center justify-center gap-1 text-xs sm:text-sm text-muted-foreground">
-                      <Clock className="h-3 w-3 sm:h-4 sm:w-4" />
-                      <span>{videos[0].duration}</span>
-                    </div>
-                  )}
                 </div>
               </div>
             ) : (
@@ -914,9 +908,22 @@ export default function HomePage() {
       )}
 
       {/* Footer */}
-      <footer className="bg-background border-t py-8 sm:py-12">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+      <footer className="relative border-t py-8 sm:py-12 overflow-hidden shadow-lg">
+        <div
+          className="absolute inset-0"
+          style={{
+            background: "linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)",
+            opacity: 0.1,
+          }}
+        />
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center">
+            {/* Decorative elements */}
+            <div className="absolute top-4 left-4 w-2 h-2 bg-accent/20 rounded-full animate-pulse"></div>
+            <div className="absolute top-8 right-8 w-1 h-1 bg-primary/30 rounded-full animate-ping"></div>
+            <div className="absolute bottom-4 left-8 w-1.5 h-1.5 bg-accent/40 rounded-full animate-pulse [animation-delay:1s]"></div>
+            <div className="absolute bottom-8 right-4 w-1 h-1 bg-primary/20 rounded-full animate-ping [animation-delay:2s]"></div>
+            
             <div className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4 text-primary">Placement Pulse</div>
             <p className="text-sm sm:text-base text-muted-foreground mb-4 sm:mb-6">Empowering students to crack their dream MBA placements and internships.</p>
             
@@ -926,7 +933,7 @@ export default function HomePage() {
                 href="https://youtube.com/@placementpulse" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="p-2 rounded-full bg-muted hover:bg-primary hover:text-primary-foreground transition-colors"
+                className="p-2 rounded-full bg-muted hover:bg-primary hover:text-primary-foreground transition-all duration-300 hover:scale-110 hover:shadow-lg"
                 aria-label="YouTube"
               >
                 <Youtube className="h-4 w-4 sm:h-5 sm:w-5" />
@@ -935,25 +942,16 @@ export default function HomePage() {
                 href="https://instagram.com/placementpulse" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="p-2 rounded-full bg-muted hover:bg-primary hover:text-primary-foreground transition-colors"
+                className="p-2 rounded-full bg-muted hover:bg-primary hover:text-primary-foreground transition-all duration-300 hover:scale-110 hover:shadow-lg"
                 aria-label="Instagram"
               >
                 <Instagram className="h-4 w-4 sm:h-5 sm:w-5" />
               </a>
               <a 
-                href="https://twitter.com/placementpulse" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="p-2 rounded-full bg-muted hover:bg-primary hover:text-primary-foreground transition-colors"
-                aria-label="Twitter"
-              >
-                <Twitter className="h-4 w-4 sm:h-5 sm:w-5" />
-              </a>
-              <a 
                 href="https://linkedin.com/company/placementpulse" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="p-2 rounded-full bg-muted hover:bg-primary hover:text-primary-foreground transition-colors"
+                className="p-2 rounded-full bg-muted hover:bg-primary hover:text-primary-foreground transition-all duration-300 hover:scale-110 hover:shadow-lg"
                 aria-label="LinkedIn"
               >
                 <Linkedin className="h-4 w-4 sm:h-5 sm:w-5" />

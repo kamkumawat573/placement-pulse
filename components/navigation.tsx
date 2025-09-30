@@ -18,7 +18,7 @@ import {
   X,
   ChevronDown,
   Settings,
-  Zap,
+  Users,
   FileText,
   GraduationCap
 } from "lucide-react"
@@ -116,17 +116,14 @@ export function Navigation() {
   }
 
   const navLinkClass = (href: string, withIcon = false) =>
-    `${withIcon ? "flex items-center gap-2 " : ""}` +
-    `${isActive(href) ? "text-primary font-semibold after:w-full" : "text-muted-foreground hover:text-foreground"} ` +
-    "relative transition-all duration-200 hover:scale-105 transform " +
-    "after:content-[''] after:absolute after:bottom-[-8px] after:left-0 after:h-0.5 " +
-    "after:bg-primary after:transition-all after:duration-200 " +
-    `${isActive(href) ? "after:w-full" : "after:w-0 hover:after:w-full"}`
+    `${withIcon ? "flex items-center gap-1.5 " : ""}` +
+    `${isActive(href) ? "text-white font-semibold bg-gradient-to-r from-purple-600 to-purple-700 rounded-lg shadow-md shadow-purple-500/25" : "text-muted-foreground hover:text-foreground hover:bg-gradient-to-r hover:from-purple-500 hover:to-purple-600 hover:shadow-md hover:shadow-purple-500/20"} ` +
+    "relative transition-all duration-200 hover:scale-105 transform px-3 py-1.5 rounded-lg text-sm"
 
   const mobileNavLinkClass = (href: string, withIcon = false) =>
-    `${withIcon ? "flex items-center gap-3 " : ""}` +
-    `${isActive(href) ? "text-primary bg-primary/10 border-l-4 border-primary" : "text-muted-foreground hover:text-foreground hover:bg-muted/50"} ` +
-    "block px-6 py-4 transition-all duration-150 hover:translate-x-1"
+    `${withIcon ? "flex items-center gap-2 " : ""}` +
+    `${isActive(href) ? "text-white bg-gradient-to-r from-purple-600 to-purple-700 rounded-lg mx-2 shadow-md shadow-purple-500/25" : "text-muted-foreground hover:text-foreground hover:bg-gradient-to-r hover:from-purple-500 hover:to-purple-600 hover:translate-x-1 hover:scale-105 rounded-lg mx-2 font-medium"} ` +
+    "block px-4 py-2.5 transition-all duration-150 relative overflow-hidden group text-sm"
 
   return (
     <>
@@ -144,20 +141,24 @@ export function Navigation() {
           href="/"
           className="flex items-center hover:scale-105 transition-transform duration-300"
         >
-          {logo && !logoLoading ? (
-            <Image
-              src={logo}
-              alt="Placement Pulse"
-              width={300}
-              height={100}
-              className="h-16 lg:h-24 w-auto"
-              priority
-            />
-          ) : (
-            <span className="text-xl lg:text-2xl font-bold text-primary">
-              Placement Pulse
-            </span>
-          )}
+          <Image
+            src="/placement-pulse-logo.png"
+            alt="Placement Pulse"
+            width={300}
+            height={100}
+            className="h-16 lg:h-24 w-auto"
+            priority
+            unoptimized={false}
+            loading="eager"
+            onError={(e) => {
+              console.log('Logo image failed to load, falling back to text');
+              e.currentTarget.style.display = 'none';
+              e.currentTarget.nextElementSibling?.classList.remove('hidden');
+            }}
+          />
+          <span className="text-xl lg:text-2xl font-bold text-primary hidden">
+            Placement Pulse
+          </span>
         </Link>
 
             {/* Desktop Navigation - Center */}
@@ -174,10 +175,10 @@ export function Navigation() {
             <FileText className="h-4 w-4" />
             Blogs
           </Link>
-              <Link href="/features" className={navLinkClass("/features", true)}>
-            <Zap className="h-4 w-4" />
-            Features
-          </Link>
+            <Link href="/features" className={navLinkClass("/features", true)}>
+              <Users className="h-4 w-4" />
+              GD Topics
+            </Link>
               <Link href="/about" className={navLinkClass("/about", true)}>
             <Info className="h-4 w-4" />
             About Us
@@ -408,8 +409,8 @@ export function Navigation() {
                   className={mobileNavLinkClass("/features", true)} 
                   onClick={() => setMobileMenuOpen(false)}
                 >
-                  <Zap className="h-5 w-5" />
-                  Features
+                  <Users className="h-5 w-5" />
+                  GD Topics
                 </Link>
                 <Link 
                   href="/about" 

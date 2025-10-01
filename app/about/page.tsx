@@ -293,10 +293,7 @@ export default function AboutPage() {
                         : 'w-16 h-16 xs:w-20 xs:h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 lg:w-32 lg:h-32 xl:w-48 xl:h-48 z-0'
                     }`}
                   >
-                    <a
-                      href={profile.linkedinUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
+                    <div
                       className={`w-full h-full block transition-all duration-500 hover:scale-105 ${
                         profile.position === 0
                           ? 'bg-gradient-to-br from-accent to-primary p-0.5 xs:p-1 sm:p-2 shadow-2xl rounded-xl xs:rounded-2xl sm:rounded-3xl'
@@ -304,7 +301,6 @@ export default function AboutPage() {
                       } ${
                         profile.position !== 0 ? 'grayscale opacity-60' : ''
                       }`}
-                      title={`View ${profile.name}'s LinkedIn Profile`}
                     >
                       <div
                         className={`w-full h-full rounded-xl xs:rounded-2xl sm:rounded-3xl overflow-hidden transition-all duration-500 ${
@@ -318,12 +314,12 @@ export default function AboutPage() {
                         <img
                           src={profile.image}
                           alt={profile.name}
-                          className={`w-full h-full object-cover transition-all duration-500 cursor-pointer ${
+                          className={`w-full h-full object-cover transition-all duration-500 ${
                             profile.position === 0 ? 'rounded-lg xs:rounded-xl sm:rounded-2xl' : 'rounded-xl xs:rounded-2xl sm:rounded-3xl'
                           }`}
                         />
                       </div>
-                    </a>
+                    </div>
                   </div>
                 ))}
               </div>

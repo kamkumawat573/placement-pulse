@@ -130,71 +130,73 @@ export function Navigation() {
       {/* Floating Navbar */}
       <nav className={`fixed top-4 left-4 right-4 z-50 transition-all duration-500 ease-out ${
         scrolled 
-          ? 'bg-background/50 backdrop-blur-xl border border-border/30 shadow-2xl shadow-primary/5 scale-[0.98]' 
-          : 'bg-background/30 backdrop-blur-xl border border-border/10 shadow-xl shadow-black/10'
+          ? 'bg-background/80 backdrop-blur-xl border border-border/30 shadow-2xl shadow-primary/5 scale-[0.98]' 
+          : 'bg-background/40 backdrop-blur-xl border border-border/20 shadow-xl shadow-black/10'
       } rounded-2xl`}>
-        <div className="container mx-auto px-3 lg:px-4">
-          <div className="flex items-center justify-between h-12 lg:h-14">
+        <div className="container mx-auto px-4 lg:px-6">
+          <div className="flex items-center justify-between h-14 lg:h-16">
             
             {/* Logo */}
-        <Link
-          href="/"
-          className="flex items-center hover:scale-105 transition-transform duration-300"
-        >
-          <Image
-            src="/placement-pulse-logo.png"
-            alt="Placement Pulse"
-            width={300}
-            height={100}
-            className="h-16 lg:h-24 w-auto"
-            priority
-            unoptimized={false}
-            loading="eager"
-            onError={(e) => {
-              console.log('Logo image failed to load, falling back to text');
-              e.currentTarget.style.display = 'none';
-              e.currentTarget.nextElementSibling?.classList.remove('hidden');
-            }}
-          />
-          <span className="text-xl lg:text-2xl font-bold text-primary hidden">
-            Placement Pulse
-          </span>
-        </Link>
+            <Link
+              href="/"
+              className="flex items-center hover:scale-105 transition-transform duration-300 flex-shrink-0"
+            >
+              <div className="relative">
+                <Image
+                  src="/placement-pulse-logo.png"
+                  alt="Placement Pulse"
+                  width={600}
+                  height={180}
+                  className="h-16 sm:h-20 lg:h-24 w-auto"
+                  priority
+                  unoptimized={false}
+                  loading="eager"
+                  onError={(e) => {
+                    console.log('Logo image failed to load, falling back to text');
+                    e.currentTarget.style.display = 'none';
+                    e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                  }}
+                />
+                <span className="text-4xl sm:text-5xl lg:text-6xl font-bold text-primary hidden">
+                  Placement Pulse
+                </span>
+              </div>
+            </Link>
 
             {/* Desktop Navigation - Center */}
-            <div className="hidden lg:flex items-center space-x-6">
+            <div className="hidden lg:flex items-center space-x-1 xl:space-x-2">
               <Link href="/" className={navLinkClass("/", true)}>
-            <Home className="h-4 w-4" />
-            Home
-          </Link>
+                <Home className="h-4 w-4" />
+                <span className="hidden xl:inline">Home</span>
+              </Link>
               <Link href="/courses" className={navLinkClass("/courses", true)}>
-            <GraduationCap className="h-4 w-4" />
-            Courses
-          </Link>
+                <GraduationCap className="h-4 w-4" />
+                <span className="hidden xl:inline">Courses</span>
+              </Link>
               <Link href="/blogs" className={navLinkClass("/blogs", true)}>
-            <FileText className="h-4 w-4" />
-            Blogs
-          </Link>
-            <Link href="/features" className={navLinkClass("/features", true)}>
-              <Users className="h-4 w-4" />
-              GD Topics
-            </Link>
+                <FileText className="h-4 w-4" />
+                <span className="hidden xl:inline">Blogs</span>
+              </Link>
+              <Link href="/features" className={navLinkClass("/features", true)}>
+                <Users className="h-4 w-4" />
+                <span className="hidden xl:inline">GD Topics</span>
+              </Link>
               <Link href="/about" className={navLinkClass("/about", true)}>
-            <Info className="h-4 w-4" />
-            About Us
-          </Link>
+                <Info className="h-4 w-4" />
+                <span className="hidden xl:inline">About Us</span>
+              </Link>
               <Link href="/testimonials" className={navLinkClass("/testimonials", true)}>
-            <MessageSquare className="h-4 w-4" />
-            Testimonials
-          </Link>
+                <MessageSquare className="h-4 w-4" />
+                <span className="hidden xl:inline">Testimonials</span>
+              </Link>
               <Link href="/contact" className={navLinkClass("/contact", true)}>
-            <Phone className="h-4 w-4" />
-            Contact Us
-          </Link>
-        </div>
+                <Phone className="h-4 w-4" />
+                <span className="hidden xl:inline">Contact Us</span>
+              </Link>
+            </div>
 
             {/* Desktop Auth Section - Right */}
-            <div className="hidden lg:flex items-center gap-2">
+            <div className="hidden lg:flex items-center gap-2 flex-shrink-0">
               {loading ? (
                 <div className="flex items-center gap-2">
                   <div className="w-8 h-8 bg-muted animate-pulse rounded-full"></div>
@@ -210,7 +212,7 @@ export function Navigation() {
                       className="flex items-center gap-2 hover:bg-primary/10 hover:border-primary transition-all duration-200"
                     >
                       <Settings className="h-4 w-4" />
-                      Admin Panel
+                      <span className="hidden xl:inline">Admin Panel</span>
                     </Button>
                   </Link>
 
@@ -225,7 +227,7 @@ export function Navigation() {
                         <div className="w-8 h-8 bg-primary/20 rounded-full flex items-center justify-center">
                           <User className="h-4 w-4" />
                         </div>
-                        <span className="hidden md:block">{admin.name}</span>
+                        <span className="hidden md:block max-w-24 truncate">{admin.name}</span>
                         <ChevronDown className="h-3 w-3" />
                       </Button>
                     </DropdownMenuTrigger>
@@ -257,45 +259,45 @@ export function Navigation() {
               ) : user ? (
                 <div className="flex items-center gap-2">
                   {/* Dashboard Button */}
-              {user.enrolledCourse && (
-                <Link href="/dashboard">
+                  {user.enrolledCourse && (
+                    <Link href="/dashboard">
                       <Button 
                         variant="outline" 
                         size="sm" 
                         className="flex items-center gap-2 hover:bg-primary/10 hover:border-primary transition-all duration-200"
                       >
-                    <BookOpen className="h-4 w-4" />
-                    Dashboard
-                  </Button>
-                </Link>
-              )}
+                        <BookOpen className="h-4 w-4" />
+                        <span className="hidden xl:inline">Dashboard</span>
+                      </Button>
+                    </Link>
+                  )}
 
                   {/* User Profile Dropdown */}
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
                       <Button 
                         variant="ghost" 
                         size="sm" 
                         className="flex items-center gap-2 hover:bg-primary/10 transition-all duration-200"
                       >
                         <div className="w-8 h-8 bg-primary/20 rounded-full flex items-center justify-center">
-                    <User className="h-4 w-4" />
+                          <User className="h-4 w-4" />
                         </div>
-                        <span className="hidden md:block">{user.name}</span>
+                        <span className="hidden md:block max-w-24 truncate">{user.name}</span>
                         <ChevronDown className="h-3 w-3" />
-                  </Button>
-                </DropdownMenuTrigger>
+                      </Button>
+                    </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="w-56 animate-in slide-in-from-top-1">
                       <div className="px-2 py-1.5 text-sm text-muted-foreground">
                         {user.email}
                       </div>
                       <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild>
-                    <Link href="/dashboard" className="flex items-center gap-2">
-                      <BookOpen className="h-4 w-4" />
-                      Dashboard
-                    </Link>
-                  </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link href="/dashboard" className="flex items-center gap-2">
+                          <BookOpen className="h-4 w-4" />
+                          Dashboard
+                        </Link>
+                      </DropdownMenuItem>
                       <DropdownMenuItem asChild>
                         <Link href="/profile" className="flex items-center gap-2">
                           <Settings className="h-4 w-4" />
@@ -306,44 +308,46 @@ export function Navigation() {
                         <Link href="/admin/images" className="flex items-center gap-2">
                           <Settings className="h-4 w-4" />
                           Manage Images
-                    </Link>
-                  </DropdownMenuItem>
-                  {!user.enrolledCourse && (
-                    <DropdownMenuItem asChild>
-                      <Link href="/enroll" className="flex items-center gap-2">
-                        <BookOpen className="h-4 w-4" />
-                        Enroll in Course
-                      </Link>
-                    </DropdownMenuItem>
-                  )}
-                  <DropdownMenuSeparator />
+                        </Link>
+                      </DropdownMenuItem>
+                      {!user.enrolledCourse && (
+                        <DropdownMenuItem asChild>
+                          <Link href="/enroll" className="flex items-center gap-2">
+                            <BookOpen className="h-4 w-4" />
+                            Enroll in Course
+                          </Link>
+                        </DropdownMenuItem>
+                      )}
+                      <DropdownMenuSeparator />
                       <DropdownMenuItem 
                         onClick={logout} 
                         className="flex items-center gap-2 text-red-600 focus:text-red-600"
                       >
-                    <LogOut className="h-4 w-4" />
-                    Sign Out
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-          ) : (
-            <div className="flex items-center gap-2">
-              <Link href="/auth">
+                        <LogOut className="h-4 w-4" />
+                        Sign Out
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <Link href="/auth">
                     <Button 
                       variant="outline" 
                       size="sm" 
                       className="hover:bg-primary/10 hover:border-primary transition-all duration-200"
                     >
-                  Sign In
-                </Button>
-              </Link>
-              <Link href="/auth?mode=signup">
+                      <span className="hidden sm:inline">Sign In</span>
+                      <span className="sm:hidden">Login</span>
+                    </Button>
+                  </Link>
+                  <Link href="/auth?mode=signup">
                     <Button 
                       size="sm" 
                       className="bg-gradient-to-r from-primary to-primary/80 hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl hover:shadow-primary/25"
                     >
-                      Enroll Now
+                      <span className="hidden sm:inline">Enroll Now</span>
+                      <span className="sm:hidden">Enroll</span>
                     </Button>
                   </Link>
                 </div>
@@ -351,18 +355,19 @@ export function Navigation() {
             </div>
 
             {/* Mobile/Tablet Menu Button */}
-            <div className="lg:hidden">
+            <div className="lg:hidden flex-shrink-0">
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="hover:bg-primary/10 transition-all duration-200"
+                className="hover:bg-primary/10 transition-all duration-200 p-2"
                 aria-label="Toggle mobile menu"
+                aria-expanded={mobileMenuOpen}
               >
                 {mobileMenuOpen ? (
-                  <X className="h-6 w-6 transition-transform duration-200" />
+                  <X className="h-5 w-5 transition-transform duration-200" />
                 ) : (
-                  <Menu className="h-6 w-6 transition-transform duration-200" />
+                  <Menu className="h-5 w-5 transition-transform duration-200" />
                 )}
               </Button>
             </div>
@@ -375,8 +380,8 @@ export function Navigation() {
             ? 'max-h-screen opacity-100' 
             : 'max-h-0 opacity-0 overflow-hidden'
         }`}>
-          <div className="border-t border-border/20 bg-background/40 backdrop-blur-xl rounded-b-2xl">
-            <div className="py-6 space-y-1">
+          <div className="border-t border-border/20 bg-background/60 backdrop-blur-xl rounded-b-2xl">
+            <div className="py-4 space-y-1">
               
               {/* Mobile Navigation Links */}
               <div className="space-y-1">
@@ -439,7 +444,7 @@ export function Navigation() {
               </div>
 
               {/* Mobile Auth Section */}
-              <div className="pt-6 px-6 border-t border-border/50">
+              <div className="pt-4 px-4 border-t border-border/50">
                 {loading ? (
                   <div className="space-y-4">
                     <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
@@ -457,9 +462,9 @@ export function Navigation() {
                       <div className="w-10 h-10 bg-primary/20 rounded-full flex items-center justify-center">
                         <User className="h-5 w-5" />
                       </div>
-                      <div>
-                        <p className="font-medium">{admin.name}</p>
-                        <p className="text-sm text-muted-foreground">{admin.email}</p>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium truncate">{admin.name}</p>
+                        <p className="text-sm text-muted-foreground truncate">{admin.email}</p>
                         <p className="text-xs text-primary font-medium">{admin.role.toUpperCase()}</p>
                       </div>
                     </div>
@@ -497,9 +502,9 @@ export function Navigation() {
                       <div className="w-10 h-10 bg-primary/20 rounded-full flex items-center justify-center">
                         <User className="h-5 w-5" />
                       </div>
-                      <div>
-                        <p className="font-medium">{user.name}</p>
-                        <p className="text-sm text-muted-foreground">{user.email}</p>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium truncate">{user.name}</p>
+                        <p className="text-sm text-muted-foreground truncate">{user.email}</p>
                       </div>
                     </div>
 
@@ -568,17 +573,16 @@ export function Navigation() {
                         size="lg" 
                         className="w-full h-12 bg-gradient-to-r from-primary to-primary/80 shadow-lg"
                       >
-                  Enroll Now
-                </Button>
-              </Link>
-            </div>
-          )}
+                        Enroll Now
+                      </Button>
+                    </Link>
+                  </div>
+                )}
               </div>
             </div>
+          </div>
         </div>
-      </div>
-    </nav>
-
+      </nav>
     </>
   )
 }

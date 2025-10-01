@@ -191,7 +191,7 @@ export default function HomePage() {
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
-      <section className="relative min-h-screen flex items-center overflow-hidden pt-16 sm:pt-20">
+      <section className="relative min-h-screen flex items-center overflow-hidden pt-20 sm:pt-24 lg:pt-28">
         <div
           ref={heroRef}
           className="absolute inset-0 parallax"

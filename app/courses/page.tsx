@@ -59,7 +59,7 @@ export default function CoursesPage() {
     rating: "4.9",
     reviews: "120",
     students: "1,000+",
-    enrollFormUrl: "https://forms.gle/your-form-id",
+    enrollFormUrl: "https://forms.gle/7ABmEt4gVtL34nxq6",
     features: [
       "Customized Mock Interview",
       "Feedback for Improvement",
@@ -434,12 +434,12 @@ export default function CoursesPage() {
                   <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">Proven results from our practice-based approach.</div>
                 </div>
                 <div className="text-center p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
-                  <div className="text-3xl font-bold text-blue-600 mb-2">500+</div>
+                  <div className="text-3xl font-bold text-blue-600 mb-2">100+</div>
                   <div className="text-sm text-gray-600 dark:text-gray-300">Mock GDs & Interviews Conducted</div>
                   <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">Gain real-world exposure before stepping into the actual placement rounds.</div>
                 </div>
                 <div className="text-center p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
-                  <div className="text-3xl font-bold text-blue-600 mb-2">₹299</div>
+                  <div className="text-3xl font-bold text-blue-600 mb-2">₹99</div>
                   <div className="text-sm text-gray-600 dark:text-gray-300">Starting Course Fee</div>
                   <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">Affordable, high-impact mentorship accessible to every MBA student.</div>
                 </div>
@@ -621,9 +621,9 @@ export default function CoursesPage() {
                 </a>
               </div>
               <div className="px-3 sm:px-4 py-3">
-                <a href="https://forms.gle/your-gdpi-form" target="_blank" rel="noopener noreferrer">
+                <Link href="/enroll">
                   <Button className="w-full bg-pink-600 hover:bg-pink-700 text-white">ENROLL NOW</Button>
-                </a>
+                </Link>
               </div>
             </div>
           </div>

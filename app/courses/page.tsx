@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Clock, User, Tag, Calendar, ArrowRight, Search, Filter, Star, Users, Play, Award, RefreshCw } from "lucide-react"
+import { Clock, User, Tag, Calendar, ArrowRight, Search, Filter, Star, Users, Play, Award, RefreshCw, CheckCircle2 } from "lucide-react"
 import { CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import Link from "next/link"
@@ -33,6 +33,7 @@ interface Course {
   rating?: string;
   reviews?: string;
   features?: string[];
+  enrollFormUrl?: string;
 }
 
 export default function CoursesPage() {
@@ -44,7 +45,31 @@ export default function CoursesPage() {
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("all")
 
+// Hardcoded course (1:1 Mock Interview)-------------------------------------------------------------------------------------------------------------------------------
+  const HARDCODED_COURSE: Course = {
+    id: "hardcoded-1-1-mock-interview",
+    title: "1:1 Mock interview",
+    description: "Personalized one-on-one mock interview with expert feedback.",
+    category: "Mock Interview",
+    imageUrl: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=400&h=300&fit=crop",
+    price: String(99 * 100), // stored in paise to match existing display logic
+    originalPrice: String(200 * 100),
+    discount: "50% OFF",
+    level: "Beginner - Advanced",
+    rating: "4.9",
+    reviews: "120",
+    students: "1,000+",
+    enrollFormUrl: "https://forms.gle/your-form-id",
+    features: [
+      "Customized Mock Interview",
+      "Feedback for Improvement",
+      "Tips for Group Discussion"
+    ]
+  }
+//---------------------------------------------------------------------------------------------------------------------------------------------------------------------
   useEffect(() => {
+    // Show hardcoded course immediately, then fetch from API
+    setCourses([HARDCODED_COURSE])
     fetchCourses()
   }, [])
 
@@ -63,10 +88,19 @@ export default function CoursesPage() {
       })
       if (response.ok) {
         const data = await response.json()
-        setCourses(data.courses || [])
+        const fetched: Course[] = data.courses || []
+        // Append hardcoded course to the list (ensure it's present once)
+        const hasHardcoded = fetched.some(c => c.id === HARDCODED_COURSE.id)
+        const merged = hasHardcoded ? fetched : [...fetched, HARDCODED_COURSE]
+        setCourses(merged)
+      } else {
+        // If API not ok, show at least the hardcoded course
+        setCourses([HARDCODED_COURSE])
       }
     } catch (error) {
       console.error('Error fetching courses:', error)
+      // On error, still show hardcoded course
+      setCourses([HARDCODED_COURSE])
     } finally {
       setLoading(false)
       if (isManualRefresh) {
@@ -156,24 +190,12 @@ export default function CoursesPage() {
         </div>
       </section>
 
+      
+
       {/* Courses Grid */}
       <section className="py-8 sm:py-12">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          {loading ? (
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {[...Array(8)].map((_, index) => (
-                <Card key={index} className="animate-pulse bg-white/50 backdrop-blur-sm border-0 shadow-md">
-                  <div className="h-32 bg-gradient-to-br from-blue-100 to-purple-100 rounded-t-lg"></div>
-                  <CardContent className="p-4">
-                    <div className="h-3 bg-gradient-to-r from-blue-200 to-purple-200 rounded mb-2"></div>
-                    <div className="h-3 bg-gradient-to-r from-blue-200 to-purple-200 rounded mb-3 w-3/4"></div>
-                    <div className="h-2 bg-gradient-to-r from-blue-200 to-purple-200 rounded mb-2"></div>
-                    <div className="h-2 bg-gradient-to-r from-blue-200 to-purple-200 rounded w-1/2"></div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          ) : filteredCourses.length > 0 ? (
+          {filteredCourses.length > 0 ? (
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
               {filteredCourses.map((course, index) => (
                 <Card
@@ -240,9 +262,28 @@ export default function CoursesPage() {
                         )}
                       </div>
                     </div>
+                    {Array.isArray(course.features) && course.features.length > 0 && (
+                      <div className="mb-3">
+                        <ul className="space-y-1">
+                          {course.features.map((feature, idx) => (
+                            <li key={idx} className="flex items-start gap-2 text-xs text-gray-700">
+                              <CheckCircle2 className="h-3.5 w-3.5 text-green-600 mt-0.5" />
+                              <span className="line-clamp-1">{feature}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
                     
                     <div className="mt-3">
-                      {user?.enrolledCourse ? (
+                      {course.enrollFormUrl ? (
+                        <a href={course.enrollFormUrl} target="_blank" rel="noopener noreferrer">
+                          <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-3 rounded-md shadow-md hover:shadow-lg transition-all duration-300 text-sm">
+                            <span>Enroll Now</span>
+                            <ArrowRight className="ml-1 h-3 w-3" />
+                          </Button>
+                        </a>
+                      ) : user?.enrolledCourse ? (
                         <Link href="/dashboard">
                           <Button className="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-3 rounded-md shadow-md hover:shadow-lg transition-all duration-300 text-sm">
                             <span>Continue Study</span>
@@ -258,6 +299,20 @@ export default function CoursesPage() {
                         </Link>
                       )}
                     </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : loading ? (
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              {[...Array(8)].map((_, index) => (
+                <Card key={index} className="animate-pulse bg-white/50 backdrop-blur-sm border-0 shadow-md">
+                  <div className="h-32 bg-gradient-to-br from-blue-100 to-purple-100 rounded-t-lg"></div>
+                  <CardContent className="p-4">
+                    <div className="h-3 bg-gradient-to-r from-blue-200 to-purple-200 rounded mb-2"></div>
+                    <div className="h-3 bg-gradient-to-r from-blue-200 to-purple-200 rounded mb-3 w-3/4"></div>
+                    <div className="h-2 bg-gradient-to-r from-blue-200 to-purple-200 rounded mb-2"></div>
+                    <div className="h-2 bg-gradient-to-r from-blue-200 to-purple-200 rounded w-1/2"></div>
                   </CardContent>
                 </Card>
               ))}
@@ -480,6 +535,96 @@ export default function CoursesPage() {
                   <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
                 </Button>
               </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+      {/* Comparison Section (Plans) moved to bottom */}
+      <section className="py-10 sm:py-14">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="overflow-hidden rounded-xl border border-gray-200 shadow-sm bg-white">
+            {/* Header Row */}
+            <div className="grid grid-cols-3 bg-slate-800 text-white text-xs sm:text-sm">
+              <div className="px-3 sm:px-4 py-3 font-semibold uppercase tracking-wide text-center">Features</div>
+              <div className="px-3 sm:px-4 py-3 font-semibold text-center">1:1 Mock Interview
+                <div className="text-[10px] sm:text-xs opacity-90">₹ 99/-</div>
+              </div>
+              <div className="px-3 sm:px-4 py-3 font-semibold text-center">GD-PI Prep Course
+                <div className="text-[10px] sm:text-xs opacity-90">₹ 999/-</div>
+              </div>
+            </div>
+
+            {[
+              { label: 'No. of Interview', left: '1', right: '3', type: 'text' },
+              { label: 'No. of Group Discussion', left: false, right: '1', type: 'bool' },
+              { label: 'CV Curation', left: false, right: true, type: 'bool' },
+              { label: 'Feedback on Interview', left: true, right: true, type: 'bool' },
+              { label: 'Recording of Interview', left: false, right: true, type: 'bool' }
+            ].map((row, idx) => (
+              <div key={idx} className={`grid grid-cols-3 text-xs sm:text-sm ${idx % 2 === 0 ? 'bg-gray-50' : 'bg-white'}`}>
+                <div className="px-3 sm:px-4 py-3 border-t border-gray-200 font-medium text-gray-700">{row.label}</div>
+                <div className="px-3 sm:px-4 py-3 border-t border-gray-200 text-center">
+                  {row.type === 'bool' ? (
+                    row.left ? (
+                      <span aria-label="Yes" className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-green-500 text-white">✓</span>
+                    ) : (
+                      <span aria-label="No" className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-white">✕</span>
+                    )
+                  ) : (
+                    <span className="font-semibold text-slate-800">{row.left}</span>
+                  )}
+                </div>
+                <div className="px-3 sm:px-4 py-3 border-t border-gray-200 text-center">
+                  {row.type === 'bool' ? (
+                    row.right ? (
+                      <span aria-label="Yes" className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-green-500 text-white">✓</span>
+                    ) : (
+                      <span aria-label="No" className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-white">✕</span>
+                    )
+                  ) : (
+                    <span className="font-semibold text-slate-800">{row.right}</span>
+                  )}
+                </div>
+              </div>
+            ))}
+
+            {/* Core feature lists */}
+            <div className="grid grid-cols-3 text-xs sm:text-sm">
+              <div className="px-3 sm:px-4 py-3 border-t border-gray-200 font-semibold text-gray-700">Core Feature</div>
+              <div className="px-3 sm:px-4 py-3 border-t border-gray-200 text-gray-700">
+                <div className="flex justify-center">
+                  <ul className="list-disc list-inside space-y-1 text-left">
+                  <li>1:1 Personal Interview</li>
+                  <li>Feedback for improvement</li>
+                  </ul>
+                </div>
+              </div>
+              <div className="px-3 sm:px-4 py-3 border-t border-gray-200 text-gray-700">
+                <div className="flex justify-center">
+                  <ul className="list-disc list-inside space-y-1 text-left">
+                  <li>1:1 Personal Interview (3)</li>
+                  <li>Feedback for improvement</li>
+                  <li>1 Group Discussion</li>
+                  <li>1:1 CV Curation</li>
+                  <li>Detailed Analysis of PI</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            {/* Footer buttons */}
+            <div className="grid grid-cols-3">
+              <div className="px-3 sm:px-4 py-3 bg-white" />
+              <div className="px-3 sm:px-4 py-3">
+                <a href={HARDCODED_COURSE.enrollFormUrl || '#'} target="_blank" rel="noopener noreferrer">
+                  <Button className="w-full bg-pink-600 hover:bg-pink-700 text-white">ENROLL NOW</Button>
+                </a>
+              </div>
+              <div className="px-3 sm:px-4 py-3">
+                <a href="https://forms.gle/your-gdpi-form" target="_blank" rel="noopener noreferrer">
+                  <Button className="w-full bg-pink-600 hover:bg-pink-700 text-white">ENROLL NOW</Button>
+                </a>
+              </div>
             </div>
           </div>
         </div>

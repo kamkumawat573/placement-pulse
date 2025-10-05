@@ -151,7 +151,7 @@ export default function TestimonialsPage() {
     {
       name: "Amit Singh",
       role: "MBA Student",
-      company: "from IIM Amritsar",
+      company: "IIM Amritsar",
       content:
         "Placement Pulse really simplified things for me. The GD practice made me realize my common mistakes, and the resume audit was so detailed. Honestly, I didn’t expect this level of feedback at such an affordable price.",
       rating: 5,
@@ -161,7 +161,7 @@ export default function TestimonialsPage() {
     {
       name: "Sidharth Bishnoi",
       role: "MBA Student",
-      company: "from IIM Vizag",
+      company: "IIM Vizag",
       content:
         "What I liked most was how practical everything was. The alumni actually told me what I was doing wrong in my answers, and their tips were super easy to apply. I felt more confident immediately.",
       rating: 5,
@@ -171,7 +171,7 @@ export default function TestimonialsPage() {
     {
       name: "Saumya Gupta",
       role: "MBA Student",
-      company: "from IIFT Delhi",
+      company: "IIFT Delhi",
       content:
         "Before this, I kept fumbling in mock interviews. After two sessions here, I learned how to structure my thoughts and avoid over-explaining. That small change made a big difference in my final placements.",
       rating: 5,

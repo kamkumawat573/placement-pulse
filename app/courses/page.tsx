@@ -567,7 +567,7 @@ export default function CoursesPage() {
 
             {[
               { label: 'No. of Interview', left: '1', right: '3', type: 'text' },
-              { label: 'No. of Group Discussion', left: false, right: '1', type: 'bool' },
+              { label: 'No. of Group Discussion', left: false, right: '1', type: 'text' },
               { label: 'CV Curation', left: false, right: true, type: 'bool' },
               { label: 'Feedback on Interview', left: true, right: true, type: 'bool' },
               { label: 'Recording of Interview', left: false, right: true, type: 'bool' }

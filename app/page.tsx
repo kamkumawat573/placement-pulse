@@ -474,7 +474,7 @@ export default function HomePage() {
                 <div className="flex items-center gap-3 bg-white rounded-xl px-6 py-4 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
                   <div className="w-8 h-8 rounded-lg flex items-center justify-center overflow-hidden">
                     <img 
-                      src="https://www.mbarendezvous.com/images/bschool-logo/bschool_1605004798.png" 
+                      src="https://th.bing.com/th/id/OSK.747d65486b70fb0fc53d8b85d5bc2de0?w=80&h=80&r=0&o=6&cb=B&pid=23.1" 
                       alt="IIFT Delhi" 
                       className="w-full h-full object-contain"
                     />
@@ -798,22 +798,22 @@ export default function HomePage() {
                 content:
                   "I lacked confidence and clarity during GD-PI prep, but Placement Pulse gave me the right guidance, practice, and support. Their mentorship boosted my performance and helped me secure admission to IIM Indore.",
                 rating: 5,
-                image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face"
+                image: "https://cdn.corenexis.com/files/b/8434467168.jpg"
               },
               {
-                name: "Mike Chen",
-                role: "JBIMS",
+                name: "Abhijit Kundu",
+                role: "Symbiosis Pune",
                 content:
-                  "I was nervous about GD-PI, CV, and LinkedIn, but Placement Pulse guided me throughout—helping polish my profile, boosting my confidence, and ultimately enabling me to crack JBIMS.",
+                  "I was nervous about GD-PI, CV, and LinkedIn, but Placement Pulse guided me throughout—helping polish my profile, boosting my confidence, and ultimately enabling me to crack Symbiosis Pune.",
                 rating: 5,
-                image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face"
+                image: "https://cdn.corenexis.com/files/b/6237293168.jpg"
               },
               {
-                name: "Emily Rodriguez",
-                role: "React Developer at Airbnb",
-                content: "The hands-on approach and real-world projects made all the difference. Highly recommended!",
+                name: "Davinder Singh",
+                role: "DBE",
+                content: "I always felt unsure about how to present myself during GD-PI and on LinkedIn. Placement Pulse helped me identify my strengths, refine my profile, and build a structured preparation approach. Thanks to their guidance and constant feedback, I was able to confidently convert my call from DBE",
                 rating: 5,
-                image: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face"
+                image: "https://cdn.corenexis.com/files/b/4767129168.jpg"
               },
             ].map((testimonial, index) => (
               <Card

@@ -4355,6 +4355,22 @@ export default function AdminDashboard() {
                         <Badge variant="secondary">No Payment Required</Badge>
                       )}
                     </div>
+
+	                  {/* Enrolled Courses */}
+	                  {studentDetails.enrolledCourses && studentDetails.enrolledCourses.length > 0 && (
+	                    <div className="mt-6">
+	                      <h3 className="text-lg font-semibold border-b pb-2">Enrolled Courses</h3>
+	                      <ul className="mt-3 space-y-2">
+	                        {studentDetails.enrolledCourses.map((enr: any, idx: number) => (
+	                          <li key={idx} className="flex items-center justify-between p-2 rounded border bg-gray-50">
+	                            <div className="text-sm font-medium">{enr.courseTitle || enr.courseId}</div>
+	                            <div className="text-xs text-gray-500">Enrolled: {enr.enrolledAt ? new Date(enr.enrolledAt).toLocaleDateString() : '—'}</div>
+	                          </li>
+	                        ))}
+	                      </ul>
+	                    </div>
+	                  )}
+
                   </div>
 
                   {/* Transaction Details */}

@@ -70,10 +70,28 @@ export async function GET(
       console.error('Error fetching payment details:', error);
     }
 
+    // Enrich enrolledCourses with course titles for admin view
+    let enrichedEnrolled = (student.enrolledCourses || []) as any[];
+    try {
+      const ecIds = Array.from(new Set((enrichedEnrolled || []).map((e: any) => String(e.courseId))));
+      if (ecIds.length > 0) {
+        const ecCourses = await CourseModel.find({ _id: { $in: ecIds } }).select('title').lean();
+        const ecMap: Record<string, string> = {};
+        ecCourses.forEach((c: any) => { ecMap[String(c._id)] = c.title; });
+        enrichedEnrolled = enrichedEnrolled.map((e: any) => ({
+          ...e,
+          courseTitle: ecMap[String(e.courseId)] || String(e.courseId)
+        }));
+      }
+    } catch (e) {
+      console.error('Failed to enrich enrolledCourses for admin view:', e);
+    }
+
     return NextResponse.json({
       success: true,
       student: {
         ...student.toObject(),
+        enrolledCourses: enrichedEnrolled,
         paymentDetails,
         paymentHistory,
       }

@@ -7,8 +7,9 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { useAuth } from "@/contexts/auth-context"
-import { Bell, Calendar, User, AlertCircle, Info, CheckCircle, AlertTriangle } from "lucide-react"
+import { Bell, Calendar, User, AlertCircle, Info, CheckCircle, AlertTriangle, BookOpen, Clock, Award, ArrowRight } from "lucide-react"
 import { Navigation } from "@/components/navigation"
+import Link from "next/link"
 
 interface Announcement {
   id: string;
@@ -24,12 +25,26 @@ interface Announcement {
   };
 }
 
+interface EnrolledCourse {
+  courseId: string;
+  title: string;
+  description: string;
+  image: string;
+  progress: number;
+  enrolledAt: string;
+  status: string;
+  category: string;
+  instructor: string;
+}
+
 export default function DashboardPage() {
   const { user, logout } = useAuth()
   const router = useRouter()
   const [mounted, setMounted] = useState(false)
   const [announcements, setAnnouncements] = useState<Announcement[]>([])
+  const [enrolledCourses, setEnrolledCourses] = useState<EnrolledCourse[]>([])
   const [loading, setLoading] = useState(true)
+  const [coursesLoading, setCoursesLoading] = useState(true)
 
   useEffect(() => {
     setMounted(true)
@@ -37,6 +52,7 @@ export default function DashboardPage() {
       router.push("/auth")
     } else {
       fetchAnnouncements()
+      fetchEnrolledCourses()
     }
   }, [user, router])
 
@@ -59,6 +75,46 @@ export default function DashboardPage() {
       console.error('Error fetching announcements:', error)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const fetchEnrolledCourses = async () => {
+    try {
+      if (!user?.enrolledCourses || user.enrolledCourses.length === 0) {
+        setCoursesLoading(false)
+        return
+      }
+
+      // Fetch course details for each enrolled course
+      const coursePromises = user.enrolledCourses.map(async (enrollment) => {
+        try {
+          const response = await fetch(`/api/courses/${enrollment.courseId}`)
+          if (response.ok) {
+            const data = await response.json()
+            return {
+              courseId: enrollment.courseId,
+              title: data.course.title,
+              description: data.course.description,
+              image: data.course.image,
+              progress: enrollment.progress,
+              enrolledAt: enrollment.enrolledAt,
+              status: enrollment.status,
+              category: data.course.category,
+              instructor: data.course.instructor
+            }
+          }
+        } catch (error) {
+          console.error('Error fetching course details:', error)
+          return null
+        }
+      })
+
+      const courses = await Promise.all(coursePromises)
+      setEnrolledCourses(courses.filter(course => course !== null))
+    } catch (error) {
+      console.error('Error fetching enrolled courses:', error)
+    } finally {
+      setCoursesLoading(false)
     }
   }
 
@@ -136,6 +192,111 @@ export default function DashboardPage() {
           >
             Logout
           </Button>
+        </div>
+
+        {/* Enrolled Courses Section */}
+        <div className="space-y-3 sm:space-y-4 lg:space-y-6 mb-6 sm:mb-8 lg:mb-10">
+          <div className="flex items-center gap-2 mb-3 sm:mb-4 lg:mb-6">
+            <BookOpen className="h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6 text-green-600 flex-shrink-0" />
+            <h2 className="text-lg sm:text-xl lg:text-2xl font-bold">My Enrolled Courses</h2>
+          </div>
+
+          {coursesLoading ? (
+            <div className="text-center py-6 sm:py-8 lg:py-12">
+              <div className="w-6 h-6 sm:w-8 sm:h-8 border-4 border-green-600 border-t-transparent rounded-full animate-spin mx-auto mb-3 sm:mb-4" />
+              <p className="text-xs sm:text-sm text-muted-foreground">Loading your courses...</p>
+            </div>
+          ) : enrolledCourses.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+              {enrolledCourses.map((course) => (
+                <Card key={course.courseId} className="hover:shadow-lg transition-all duration-300 group">
+                  <div className="relative overflow-hidden rounded-t-lg">
+                    <img
+                      src={course.image}
+                      alt={course.title}
+                      className="w-full h-32 sm:h-40 object-cover group-hover:scale-105 transition-transform duration-300"
+                      onError={(e) => {
+                        e.currentTarget.src = '/placeholder.jpg'
+                      }}
+                    />
+                    <div className="absolute top-2 right-2">
+                      <Badge className={`${
+                        course.status === 'active' ? 'bg-green-100 text-green-800' :
+                        course.status === 'completed' ? 'bg-blue-100 text-blue-800' :
+                        'bg-gray-100 text-gray-800'
+                      }`}>
+                        {course.status.toUpperCase()}
+                      </Badge>
+                    </div>
+                  </div>
+                  <CardContent className="p-4">
+                    <div className="space-y-3">
+                      <div>
+                        <h3 className="font-bold text-sm sm:text-base mb-1 line-clamp-2 group-hover:text-green-600 transition-colors">
+                          {course.title}
+                        </h3>
+                        <p className="text-xs text-muted-foreground line-clamp-2">
+                          {course.description}
+                        </p>
+                      </div>
+                      
+                      <div className="flex items-center justify-between text-xs text-muted-foreground">
+                        <div className="flex items-center gap-1">
+                          <User className="h-3 w-3" />
+                          <span>{course.instructor}</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Calendar className="h-3 w-3" />
+                          <span>{new Date(course.enrolledAt).toLocaleDateString()}</span>
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between text-xs">
+                          <span>Progress</span>
+                          <span className="font-medium">{course.progress}%</span>
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-2">
+                          <div 
+                            className="bg-green-600 h-2 rounded-full transition-all duration-300"
+                            style={{ width: `${course.progress}%` }}
+                          />
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-between">
+                        <Badge variant="outline" className="text-xs">
+                          {course.category}
+                        </Badge>
+                        <Link href={`/course/${course.courseId}`}>
+                          <Button size="sm" className="text-xs">
+                            Continue
+                            <ArrowRight className="ml-1 h-3 w-3" />
+                          </Button>
+                        </Link>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <Card className="border-dashed border-2 border-gray-200">
+              <CardContent className="text-center py-6 sm:py-8 lg:py-12 px-4 sm:px-6">
+                <BookOpen className="h-8 w-8 sm:h-10 sm:w-10 lg:h-12 lg:w-12 text-muted-foreground mx-auto mb-3 sm:mb-4" />
+                <h3 className="text-sm sm:text-base lg:text-lg font-semibold mb-1 sm:mb-2">No courses enrolled yet</h3>
+                <p className="text-xs sm:text-sm lg:text-base text-muted-foreground max-w-md mx-auto mb-4">
+                  Start your learning journey by enrolling in our courses.
+                </p>
+                <Link href="/courses">
+                  <Button className="bg-green-600 hover:bg-green-700 text-white">
+                    Browse Courses
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
+          )}
         </div>
 
         {/* Updates/Announcements Section */}

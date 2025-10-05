@@ -17,7 +17,17 @@ export async function GET() {
     if (!user) return new Response(JSON.stringify({ user: null }), { status: 200 })
 
     return new Response(
-      JSON.stringify({ user: { id: user._id.toString(), email: user.email, name: user.name, mobile: user.mobile, enrolledCourse: user.enrolledCourse, progress: user.progress } }),
+      JSON.stringify({ 
+        user: { 
+          id: user._id.toString(), 
+          email: user.email, 
+          name: user.name, 
+          mobile: user.mobile, 
+          enrolledCourse: user.enrolledCourse, 
+          enrolledCourses: user.enrolledCourses || [],
+          progress: user.progress 
+        } 
+      }),
       { status: 200 }
     )
   } catch {

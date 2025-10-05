@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -9,12 +11,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { 
-  Users, 
-  GraduationCap, 
-  DollarSign, 
-  TrendingUp, 
-  Settings, 
+import {
+  Users,
+  GraduationCap,
+  DollarSign,
+  TrendingUp,
+  Settings,
   LogOut,
   Eye,
   Edit,
@@ -282,13 +284,23 @@ export default function AdminDashboard() {
     bypassPayment: false
   });
   const [updatingStudent, setUpdatingStudent] = useState(false);
+  const [newStudentCourseId, setNewStudentCourseId] = useState<string>('')
+  const [enrollCourseSelection, setEnrollCourseSelection] = useState<{ [key: string]: string }>({})
+  const [enrollingStudentId, setEnrollingStudentId] = useState<string | null>(null)
+
+	  // Payment history filters (Student View)
+	  const [paymentFilterStatus, setPaymentFilterStatus] = useState<string>('all')
+	  const [paymentFilterCourse, setPaymentFilterCourse] = useState<string>('all')
+
+
+
   const [selectedMessage, setSelectedMessage] = useState<ContactMessage | null>(null);
   const [showMessageView, setShowMessageView] = useState(false);
   const [messageFilter, setMessageFilter] = useState<'all' | 'new' | 'read' | 'replied' | 'closed'>('all');
   const [messagePriority, setMessagePriority] = useState<'all' | 'low' | 'medium' | 'high' | 'urgent'>('all');
   const [updatingMessage, setUpdatingMessage] = useState(false);
   const [messageNotes, setMessageNotes] = useState('');
-  
+
   // GD Topics state
   const [gdTopics, setGdTopics] = useState<any[]>([]);
   const [showCreateGDTopic, setShowCreateGDTopic] = useState(false);
@@ -312,16 +324,16 @@ export default function AdminDashboard() {
 
   // Filtered GD topics
   const filteredGdTopics = gdTopics.filter(topic => {
-    const matchesSearch = !gdTopicSearch || 
+    const matchesSearch = !gdTopicSearch ||
       topic.title.toLowerCase().includes(gdTopicSearch.toLowerCase()) ||
       topic.description.toLowerCase().includes(gdTopicSearch.toLowerCase()) ||
       topic.category.toLowerCase().includes(gdTopicSearch.toLowerCase());
-    
+
     const matchesFilter = gdTopicFilter === 'all' ||
       (gdTopicFilter === 'trending' && topic.isTrending) ||
       (gdTopicFilter === 'active' && topic.isActive) ||
       (gdTopicFilter === 'inactive' && !topic.isActive);
-    
+
     return matchesSearch && matchesFilter;
   });
 
@@ -401,7 +413,7 @@ export default function AdminDashboard() {
         },
         body: JSON.stringify({ confirm: true }),
       });
-      
+
       if (response.ok) {
         const data = await response.json();
         alert(`Revenue reset successfully! Deleted ${data.deletedCount} payment records.`);
@@ -437,7 +449,7 @@ export default function AdminDashboard() {
       const params = new URLSearchParams();
       if (messageFilter !== 'all') params.append('status', messageFilter);
       if (messagePriority !== 'all') params.append('priority', messagePriority);
-      
+
       const response = await fetch(`/api/admin/messages?${params.toString()}`);
       if (response.ok) {
         const data = await response.json();
@@ -709,13 +721,13 @@ export default function AdminDashboard() {
       if (response.ok) {
         const data = await response.json();
         setSettings(data.settings);
-        
+
         // Find hero image setting
         const heroImageSetting = data.settings.find((s: any) => s.key === 'hero_image_url');
         if (heroImageSetting) {
           setHeroImageUrl(heroImageSetting.value);
         }
-        
+
         // Find logo setting
         const logoSetting = data.settings.find((s: any) => s.key === 'logo_url');
         if (logoSetting) {
@@ -826,9 +838,14 @@ export default function AdminDashboard() {
       alert('Please fill in all required fields');
       return;
     }
+    if (!newStudentCourseId) {
+      alert('Please select a course to enroll the student');
+      return;
+    }
 
     setCreatingStudent(true);
     try {
+      // 1) Create the student
       const response = await fetch('/api/admin/students', {
         method: 'POST',
         headers: {
@@ -836,21 +853,43 @@ export default function AdminDashboard() {
         },
         body: JSON.stringify({
           ...newStudent,
-          enrolledCourse: true, // Auto-enroll the student
-          transactionId: 'ADMIN_ENROLLED', // Mark as admin enrolled
-          bypassPayment: true
+          enrolledCourse: true,
+          transactionId: 'ADMIN_ENROLLED',
+          bypassPayment: true,
         }),
       });
 
-      if (response.ok) {
-        alert('Student created and enrolled successfully!');
-        setNewStudent({ name: '', email: '', mobile: '', password: '' });
-        setShowCreateStudent(false);
-        fetchStudents(); // Refresh the students list
-      } else {
+      if (!response.ok) {
         const error = await response.json();
         alert(error.error || 'Failed to create student');
+        return;
       }
+
+      const created = await response.json();
+      const studentId = created?.user?._id || created?.user?.id;
+      if (!studentId) {
+        alert('Created student but could not determine ID');
+        return;
+      }
+
+      // 2) Enroll the student into the selected course without payment
+      const enrollRes = await fetch(`/api/admin/students/${studentId}/enrollments`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ courseId: newStudentCourseId })
+      });
+
+      if (!enrollRes.ok) {
+        const err = await enrollRes.json();
+        alert(err.error || 'Student created but enrollment failed');
+        return;
+      }
+
+      alert('Student created and enrolled successfully!');
+      setNewStudent({ name: '', email: '', mobile: '', password: '' });
+      setNewStudentCourseId('');
+      setShowCreateStudent(false);
+      fetchStudents();
     } catch (error) {
       console.error('Error creating student:', error);
       alert('Error creating student');
@@ -969,14 +1008,14 @@ export default function AdminDashboard() {
       if (response.ok) {
         const data = await response.json();
         console.log('Price updated successfully:', data);
-        
+
         // Update the course in the courses array
-        setCourses(courses.map(course => 
-          course._id === editingPrice._id 
+        setCourses(courses.map(course =>
+          course._id === editingPrice._id
             ? { ...course, price: data.course.price, originalPrice: data.course.originalPrice, discount: data.course.discount }
             : course
         ));
-        
+
         setEditingPrice(null);
         setPriceForm({ price: '', originalPrice: '', discount: '', changeReason: '' });
         setPriceHistory([]);
@@ -1117,7 +1156,7 @@ export default function AdminDashboard() {
 
   const updateVideo = async () => {
     if (!editingVideo) return;
-    
+
     if (!newVideo.title.trim()) {
       alert('Title is required');
       return;
@@ -1211,14 +1250,14 @@ export default function AdminDashboard() {
       // First, unfeature all other videos
       const updatePromises = videos
         .filter(v => v.videoId !== videoId)
-        .map(v => 
+        .map(v =>
           fetch(`/api/admin/videos/${v.videoId}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ ...v, isFeatured: false })
           })
         );
-      
+
       await Promise.all(updatePromises);
 
       // Then feature the selected video
@@ -1430,12 +1469,12 @@ export default function AdminDashboard() {
 
   const deleteStudent = async (studentId: string) => {
     if (!confirm('Are you sure you want to delete this student?')) return;
-    
+
     try {
       const response = await fetch(`/api/admin/students/${studentId}`, {
         method: 'DELETE'
       });
-      
+
       if (response.ok) {
         setStudents(students.filter(s => s._id !== studentId));
         fetchStats(); // Refresh stats
@@ -1450,7 +1489,7 @@ export default function AdminDashboard() {
     setSelectedStudent(student);
     setLoadingStudentDetails(true);
     setShowStudentView(true);
-    
+
     try {
       const response = await fetch(`/api/admin/students/${student._id}`);
       if (response.ok) {
@@ -1480,7 +1519,7 @@ export default function AdminDashboard() {
 
   const updateStudent = async () => {
     if (!selectedStudent) return;
-    
+
     setUpdatingStudent(true);
     try {
       const response = await fetch(`/api/admin/students/${selectedStudent._id}`, {
@@ -1490,11 +1529,11 @@ export default function AdminDashboard() {
         },
         body: JSON.stringify(editingStudent),
       });
-      
+
       if (response.ok) {
         // Update local state
-        setStudents(students.map(s => 
-          s._id === selectedStudent._id 
+        setStudents(students.map(s =>
+          s._id === selectedStudent._id
             ? { ...s, ...editingStudent }
             : s
         ));
@@ -1514,11 +1553,40 @@ export default function AdminDashboard() {
     }
   };
 
+  const enrollExistingStudent = async (studentId: string) => {
+    const courseId = enrollCourseSelection[studentId]
+    if (!courseId) {
+      alert('Please select a course to enroll')
+      return
+    }
+    setEnrollingStudentId(studentId)
+    try {
+      const res = await fetch(`/api/admin/students/${studentId}/enrollments`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ courseId })
+      })
+      if (res.ok) {
+        alert('Student enrolled successfully!')
+        setStudents(students.map(s => s._id === studentId ? { ...s, enrolledCourse: true, transactionId: 'ADMIN_ENROLLED', bypassPayment: true } : s))
+        fetchStats()
+      } else {
+        const err = await res.json()
+        alert(err.error || 'Failed to enroll student')
+      }
+    } catch (e) {
+      console.error('Enroll student error:', e)
+      alert('Failed to enroll student')
+    } finally {
+      setEnrollingStudentId(null)
+    }
+  }
+
   const viewMessage = (message: ContactMessage) => {
     setSelectedMessage(message);
     setMessageNotes(message.adminNotes || '');
     setShowMessageView(true);
-    
+
     // Mark as read if it's new
     if (message.status === 'new') {
       updateMessageStatus(message._id, 'read');
@@ -1532,13 +1600,13 @@ export default function AdminDashboard() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ 
-          status, 
-          priority: priority || undefined, 
-          adminNotes: notes || undefined 
+        body: JSON.stringify({
+          status,
+          priority: priority || undefined,
+          adminNotes: notes || undefined
         }),
       });
-      
+
       if (response.ok) {
         fetchMessages(); // Refresh messages
       }
@@ -1549,12 +1617,12 @@ export default function AdminDashboard() {
 
   const deleteMessage = async (messageId: string) => {
     if (!confirm('Are you sure you want to delete this message?')) return;
-    
+
     try {
       const response = await fetch(`/api/admin/messages/${messageId}`, {
         method: 'DELETE'
       });
-      
+
       if (response.ok) {
         setMessages(messages.filter(m => m._id !== messageId));
       }
@@ -1602,8 +1670,8 @@ export default function AdminDashboard() {
       });
 
       if (response.ok) {
-        setCourses(courses.map(c => 
-          c._id === courseId 
+        setCourses(courses.map(c =>
+          c._id === courseId
             ? { ...c, isActive: !c.isActive }
             : c
         ));
@@ -1620,7 +1688,7 @@ export default function AdminDashboard() {
 
   const saveMessageNotes = async () => {
     if (!selectedMessage) return;
-    
+
     setUpdatingMessage(true);
     try {
       await updateMessageStatus(selectedMessage._id, selectedMessage.status, selectedMessage.priority, messageNotes);
@@ -1637,7 +1705,7 @@ export default function AdminDashboard() {
   const createAnnouncement = async () => {
     try {
       setCreatingAnnouncement(true);
-      
+
       const response = await fetch('/api/admin/announcements', {
         method: 'POST',
         headers: {
@@ -1653,7 +1721,7 @@ export default function AdminDashboard() {
           specificStudents: newAnnouncement.targetAudience === 'specific' ? selectedStudents : []
         }),
       });
-      
+
       if (response.ok) {
         fetchAnnouncements(); // Refresh announcements
         setNewAnnouncement({
@@ -1676,8 +1744,8 @@ export default function AdminDashboard() {
   };
 
   const toggleStudentSelection = (studentId: string) => {
-    setSelectedStudents(prev => 
-      prev.includes(studentId) 
+    setSelectedStudents(prev =>
+      prev.includes(studentId)
         ? prev.filter(id => id !== studentId)
         : [...prev, studentId]
     );
@@ -1731,7 +1799,7 @@ export default function AdminDashboard() {
               <div className="text-xl sm:text-2xl font-bold">{stats.totalStudents}</div>
             </CardContent>
           </Card>
-          
+
           <Card className="hover:shadow-md transition-shadow">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 sm:p-4 lg:p-6">
               <CardTitle className="text-xs sm:text-sm font-medium truncate">Enrolled Students</CardTitle>
@@ -1741,7 +1809,7 @@ export default function AdminDashboard() {
               <div className="text-xl sm:text-2xl font-bold">{stats.enrolledStudents}</div>
             </CardContent>
           </Card>
-          
+
           <Card className="hover:shadow-md transition-shadow">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 sm:p-4 lg:p-6">
               <CardTitle className="text-xs sm:text-sm font-medium truncate">Total Revenue</CardTitle>
@@ -1761,7 +1829,7 @@ export default function AdminDashboard() {
               <div className="text-xl sm:text-2xl font-bold">₹{stats.totalRevenue.toLocaleString()}</div>
             </CardContent>
           </Card>
-          
+
           <Card className="hover:shadow-md transition-shadow">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 sm:p-4 lg:p-6">
               <CardTitle className="text-xs sm:text-sm font-medium truncate">Recent Enrollments</CardTitle>
@@ -1772,6 +1840,16 @@ export default function AdminDashboard() {
             </CardContent>
           </Card>
         </div>
+        <div className="mb-3 sm:mb-4">
+          <Link href="/admin/course-center">
+            <Button variant="outline" size="sm" className="flex items-center gap-2">
+              <BookOpen className="h-4 w-4" />
+              <span className="hidden sm:inline">Course Center (Materials & Notifications)</span>
+              <span className="sm:hidden">Course Center</span>
+            </Button>
+          </Link>
+        </div>
+
 
         {/* Main Content */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-3 sm:space-y-4 lg:space-y-6">
@@ -1835,7 +1913,7 @@ export default function AdminDashboard() {
                       Manage all students and their enrollment status
                     </CardDescription>
                   </div>
-                  <Button 
+                  <Button
                     onClick={() => setShowCreateStudent(!showCreateStudent)}
                     className="flex items-center gap-2 w-full sm:w-auto text-xs sm:text-sm px-3 py-2"
                   >
@@ -1891,10 +1969,25 @@ export default function AdminDashboard() {
                           placeholder="Enter temporary password"
                           className="mt-1 text-xs sm:text-sm"
                         />
+                      <div className="sm:col-span-2">
+                        <Label htmlFor="studentCourse" className="text-xs sm:text-sm">Enroll to Course *</Label>
+                        <select
+                          id="studentCourse"
+                          value={newStudentCourseId}
+                          onChange={(e) => setNewStudentCourseId(e.target.value)}
+                          className="mt-1 block w-full px-3 py-2 text-sm border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                        >
+                          <option value="">Select a course</option>
+                          {courses.map((c) => (
+                            <option key={c._id} value={c._id}>{c.title}</option>
+                          ))}
+                        </select>
+                      </div>
+
                       </div>
                     </div>
                     <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 mt-3 sm:mt-4">
-                      <Button 
+                      <Button
                         onClick={createStudent}
                         disabled={creatingStudent}
                         className="flex items-center gap-2 w-full sm:w-auto text-xs sm:text-sm px-3 py-2"
@@ -1902,7 +1995,7 @@ export default function AdminDashboard() {
                         <UserCheck className="h-3 w-3 sm:h-4 sm:w-4" />
                         {creatingStudent ? 'Creating...' : 'Create & Enroll Student'}
                       </Button>
-                      <Button 
+                      <Button
                         variant="outline"
                         onClick={() => {
                           setShowCreateStudent(false);
@@ -1914,7 +2007,7 @@ export default function AdminDashboard() {
                       </Button>
                     </div>
                     <p className="text-xs sm:text-sm text-gray-600 mt-2">
-                      <strong>Note:</strong> The student will be automatically enrolled in the course without payment.
+                      <strong>Note:</strong> The student will be automatically enrolled in the selected course without payment.
                     </p>
                   </div>
                 )}
@@ -1944,30 +2037,51 @@ export default function AdminDashboard() {
                             {student.bypassPayment && (
                               <Badge variant="secondary" className="text-xs">No Payment Required</Badge>
                             )}
+                      <div className="w-full sm:w-auto mt-2 grid grid-cols-1 sm:flex sm:items-center gap-2">
+                        <select
+                          value={enrollCourseSelection[student._id] || ''}
+                          onChange={(e) => setEnrollCourseSelection({ ...enrollCourseSelection, [student._id]: e.target.value })}
+                          className="block w-full sm:w-64 px-3 py-2 text-xs border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                        >
+                          <option value="">Select course to enroll</option>
+                          {courses.map((c) => (
+                            <option key={c._id} value={c._id}>{c.title}</option>
+                          ))}
+                        </select>
+                        <Button
+                          size="sm"
+                          onClick={() => enrollExistingStudent(student._id)}
+                          disabled={!enrollCourseSelection[student._id] || enrollingStudentId === student._id}
+                          className="text-xs px-2 py-1"
+                        >
+                          {enrollingStudentId === student._id ? 'Enrolling...' : 'Enroll (No Payment)'}
+                        </Button>
+                      </div>
+
                           </div>
                         </div>
                       </div>
                       <div className="flex gap-1 sm:gap-2 w-full sm:w-auto mt-2 sm:mt-0">
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
+                        <Button
+                          variant="outline"
+                          size="sm"
                           onClick={() => viewStudent(student)}
                           className="flex-1 sm:flex-none text-xs px-2 py-1"
                         >
                           <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
                           <span className="hidden sm:inline ml-1">View</span>
                         </Button>
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
+                        <Button
+                          variant="outline"
+                          size="sm"
                           onClick={() => editStudent(student)}
                           className="flex-1 sm:flex-none text-xs px-2 py-1"
                         >
                           <Edit className="h-3 w-3 sm:h-4 sm:w-4" />
                           <span className="hidden sm:inline ml-1">Edit</span>
                         </Button>
-                        <Button 
-                          variant="outline" 
+                        <Button
+                          variant="outline"
                           size="sm"
                           onClick={() => deleteStudent(student._id)}
                           className="text-red-600 hover:text-red-700 flex-1 sm:flex-none text-xs px-2 py-1"
@@ -1996,7 +2110,7 @@ export default function AdminDashboard() {
                       Create and manage course content and modules
                     </CardDescription>
                   </div>
-                  <Button 
+                  <Button
                     onClick={() => setShowCreateCourse(!showCreateCourse)}
                     className="flex items-center gap-2 w-full sm:w-auto text-xs sm:text-sm px-3 py-2"
                   >
@@ -2038,9 +2152,9 @@ export default function AdminDashboard() {
                         </div>
                       </div>
                       <div className="flex flex-wrap gap-1 sm:gap-2 w-full sm:w-auto mt-2 sm:mt-0">
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
+                        <Button
+                          variant="outline"
+                          size="sm"
                           onClick={() => handleEditCourse(course)}
                           title="Edit Course"
                           className="flex-1 sm:flex-none text-xs px-2 py-1"
@@ -2048,8 +2162,8 @@ export default function AdminDashboard() {
                           <Edit className="h-3 w-3 sm:h-4 sm:w-4" />
                           <span className="hidden sm:inline ml-1">Edit</span>
                         </Button>
-                        <Button 
-                          variant="outline" 
+                        <Button
+                          variant="outline"
                           size="sm"
                           onClick={() => editCoursePrice(course)}
                           title="Edit Price"
@@ -2058,13 +2172,13 @@ export default function AdminDashboard() {
                           <DollarSign className="h-3 w-3 sm:h-4 sm:w-4" />
                           <span className="hidden sm:inline ml-1">Price</span>
                         </Button>
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
+                        <Button
+                          variant="outline"
+                          size="sm"
                           onClick={() => toggleCourseVisibility(course._id)}
                           className={`flex-1 sm:flex-none text-xs px-2 py-1 ${
-                            course.isActive 
-                              ? 'text-orange-600 hover:text-orange-700' 
+                            course.isActive
+                              ? 'text-orange-600 hover:text-orange-700'
                               : 'text-green-600 hover:text-green-700'
                           }`}
                           title={course.isActive ? 'Hide Course' : 'Show Course'}
@@ -2074,9 +2188,9 @@ export default function AdminDashboard() {
                             {course.isActive ? 'Hide' : 'Show'}
                           </span>
                         </Button>
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
+                        <Button
+                          variant="outline"
+                          size="sm"
                           onClick={() => deleteCourse(course._id)}
                           className="flex-1 sm:flex-none text-xs px-2 py-1 text-red-600 hover:text-red-700"
                           title="Delete Course"
@@ -2563,7 +2677,7 @@ export default function AdminDashboard() {
                       />
                     </div>
                   </div>
-                  
+
                   <div>
                     <Label htmlFor="change-reason">Reason for Change (Optional)</Label>
                     <Input
@@ -2573,7 +2687,7 @@ export default function AdminDashboard() {
                       placeholder="e.g., Seasonal discount, promotional offer"
                     />
                   </div>
-                  
+
                   <div className="bg-blue-50 p-4 rounded-lg">
                     <h4 className="font-medium text-blue-900 mb-2">Price Preview</h4>
                     <div className="flex items-center gap-2">
@@ -2675,7 +2789,7 @@ export default function AdminDashboard() {
                       Create and manage platform announcements
                     </CardDescription>
                   </div>
-                  <Button 
+                  <Button
                     onClick={() => setShowCreateAnnouncement(!showCreateAnnouncement)}
                     className="flex items-center gap-2 w-full sm:w-auto text-xs sm:text-sm px-3 py-2"
                   >
@@ -3029,18 +3143,18 @@ export default function AdminDashboard() {
                           </div>
                         </div>
                         <div className="flex gap-1 sm:gap-2 w-full sm:w-auto mt-2 sm:mt-0">
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
+                          <Button
+                            variant="outline"
+                            size="sm"
                             className="flex-1 sm:flex-none text-xs px-2 py-1"
                             onClick={() => handleEditAnnouncement(announcement)}
                           >
                             <Edit className="h-3 w-3 sm:h-4 sm:w-4" />
                             <span className="hidden sm:inline ml-1">Edit</span>
                           </Button>
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
+                          <Button
+                            variant="outline"
+                            size="sm"
                             className="flex-1 sm:flex-none text-xs px-2 py-1"
                             onClick={() => handleDeleteAnnouncement(announcement._id)}
                             disabled={deletingAnnouncement === announcement._id}
@@ -3077,7 +3191,7 @@ export default function AdminDashboard() {
                       Create and manage blog posts
                     </CardDescription>
                   </div>
-                  <Button 
+                  <Button
                     onClick={() => setShowCreateBlog(!showCreateBlog)}
                     className="flex items-center gap-2 w-full sm:w-auto text-xs sm:text-sm px-3 py-2"
                   >
@@ -3166,7 +3280,7 @@ export default function AdminDashboard() {
                         </div>
                       </div>
                       <div className="flex gap-2">
-                        <Button 
+                        <Button
                           onClick={createBlog}
                           disabled={creatingBlog}
                           className="flex items-center gap-2"
@@ -3183,8 +3297,8 @@ export default function AdminDashboard() {
                             </>
                           )}
                         </Button>
-                        <Button 
-                          variant="outline" 
+                        <Button
+                          variant="outline"
                           onClick={() => {
                             setShowCreateBlog(false);
                             setNewBlog({
@@ -3294,7 +3408,7 @@ export default function AdminDashboard() {
                         </div>
                       </div>
                       <div className="flex gap-2">
-                        <Button 
+                        <Button
                           onClick={updateBlog}
                           disabled={updatingBlog}
                           className="flex items-center gap-2"
@@ -3311,8 +3425,8 @@ export default function AdminDashboard() {
                             </>
                           )}
                         </Button>
-                        <Button 
-                          variant="outline" 
+                        <Button
+                          variant="outline"
                           onClick={() => {
                             setEditingBlog(null);
                             setEditBlog({
@@ -3340,8 +3454,8 @@ export default function AdminDashboard() {
                         <div className="flex flex-col sm:flex-row sm:items-start gap-3">
                           {blog.coverImage && (
                             <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
-                              <img 
-                                src={blog.coverImage} 
+                              <img
+                                src={blog.coverImage}
                                 alt={blog.title || blog.caption}
                                 className="w-full h-full object-cover"
                               />
@@ -3380,8 +3494,8 @@ export default function AdminDashboard() {
                               )}
                               {blog.isVisible !== undefined && (
                                 <span className={`flex items-center gap-1 px-2 py-1 rounded text-xs ${
-                                  blog.isVisible 
-                                    ? 'bg-green-100 text-green-800' 
+                                  blog.isVisible
+                                    ? 'bg-green-100 text-green-800'
                                     : 'bg-red-100 text-red-800'
                                 }`}>
                                   {blog.isVisible ? 'Visible' : 'Hidden'}
@@ -3392,8 +3506,8 @@ export default function AdminDashboard() {
                         </div>
                       </div>
                       <div className="flex gap-1 sm:gap-2 w-full sm:w-auto">
-                        <Button 
-                          variant="outline" 
+                        <Button
+                          variant="outline"
                           size="sm"
                           onClick={() => editBlogPost(blog._id)}
                           title="Edit Blog"
@@ -3403,8 +3517,8 @@ export default function AdminDashboard() {
                           <span className="hidden sm:inline ml-1">Edit</span>
                         </Button>
                         {blog.isVisible !== undefined && (
-                          <Button 
-                            variant="outline" 
+                          <Button
+                            variant="outline"
                             size="sm"
                             onClick={() => toggleBlogVisibility(blog._id, blog.isVisible ?? true)}
                             title={blog.isVisible ? 'Hide Blog' : 'Show Blog'}
@@ -3414,9 +3528,9 @@ export default function AdminDashboard() {
                             <span className="hidden sm:inline ml-1">{blog.isVisible ? 'Hide' : 'Show'}</span>
                           </Button>
                         )}
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
+                        <Button
+                          variant="outline"
+                          size="sm"
                           onClick={() => deleteBlog(blog._id)}
                           className="text-red-600 hover:text-red-700 flex-1 sm:flex-none"
                           title="Delete Blog"
@@ -3450,7 +3564,7 @@ export default function AdminDashboard() {
                       Create and manage video content for the homepage. The featured video will be displayed on the homepage.
                     </CardDescription>
                   </div>
-                  <Button 
+                  <Button
                     onClick={() => setShowCreateVideo(!showCreateVideo)}
                     className="flex items-center gap-2 w-full sm:w-auto"
                   >
@@ -3549,12 +3663,12 @@ export default function AdminDashboard() {
                         </label>
                       </div>
                       <div className="flex gap-2">
-                        <Button 
-                          onClick={editingVideo ? updateVideo : createVideo} 
+                        <Button
+                          onClick={editingVideo ? updateVideo : createVideo}
                           disabled={creatingBlog}
                         >
-                          {creatingBlog 
-                            ? (editingVideo ? 'Updating...' : 'Creating...') 
+                          {creatingBlog
+                            ? (editingVideo ? 'Updating...' : 'Creating...')
                             : (editingVideo ? 'Update Video' : 'Create Video')
                           }
                         </Button>
@@ -3597,8 +3711,8 @@ export default function AdminDashboard() {
                         {video.isFeatured && (
                           <Badge variant="outline" className="text-xs">Featured</Badge>
                         )}
-                        <Button 
-                          size="sm" 
+                        <Button
+                          size="sm"
                           variant={video.isFeatured ? "default" : "outline"}
                           onClick={() => setAsHomepageVideo(video.videoId)}
                           className="text-xs"
@@ -3606,8 +3720,8 @@ export default function AdminDashboard() {
                           <span className="hidden sm:inline">{video.isFeatured ? "Homepage Video" : "Set as Homepage"}</span>
                           <span className="sm:hidden">{video.isFeatured ? "Homepage" : "Set"}</span>
                         </Button>
-                        <Button 
-                          size="sm" 
+                        <Button
+                          size="sm"
                           variant="outline"
                           onClick={() => editVideo(video)}
                           className="flex-1 sm:flex-none"
@@ -3615,14 +3729,16 @@ export default function AdminDashboard() {
                           <Edit className="h-3 w-3 sm:h-4 sm:w-4" />
                           <span className="hidden sm:inline ml-1">Edit</span>
                         </Button>
-                        <Button 
-                          size="sm" 
+                        <Button
+                          size="sm"
                           variant="outline"
                           onClick={() => deleteVideo(video.videoId)}
                           className="flex-1 sm:flex-none"
                         >
                           <Trash2 className="h-3 w-3 sm:h-4 sm:w-4" />
                           <span className="hidden sm:inline ml-1">Delete</span>
+
+
                         </Button>
                       </div>
                     </div>
@@ -3653,6 +3769,8 @@ export default function AdminDashboard() {
                         fetchMessages();
                       }}
                       className="text-xs sm:text-sm px-2 py-1 border rounded"
+
+
                     >
                       <option value="all">All Messages</option>
                       <option value="new">New</option>
@@ -3698,22 +3816,22 @@ export default function AdminDashboard() {
                               <p className="text-xs sm:text-sm text-gray-600 line-clamp-2 mt-1">{message.message}</p>
                             </div>
                             <div className="flex flex-wrap gap-1 sm:gap-2">
-                              <Badge 
+                              <Badge
                                 variant={
-                                  message.status === 'new' ? 'default' : 
+                                  message.status === 'new' ? 'default' :
                                   message.status === 'read' ? 'secondary' :
                                   message.status === 'replied' ? 'outline' : 'destructive'
-                                } 
+                                }
                                 className="text-xs"
                               >
                                 {message.status}
                               </Badge>
-                              <Badge 
+                              <Badge
                                 variant={
                                   message.priority === 'urgent' ? 'destructive' :
                                   message.priority === 'high' ? 'default' :
                                   message.priority === 'medium' ? 'secondary' : 'outline'
-                                } 
+                                }
                                 className="text-xs"
                               >
                                 {message.priority}
@@ -3725,17 +3843,17 @@ export default function AdminDashboard() {
                           </div>
                         </div>
                         <div className="flex gap-1 sm:gap-2 w-full sm:w-auto mt-2 sm:mt-0">
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
+                          <Button
+                            variant="outline"
+                            size="sm"
                             onClick={() => viewMessage(message)}
                             className="flex-1 sm:flex-none text-xs px-2 py-1"
                           >
                             <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
                             <span className="hidden sm:inline ml-1">View</span>
                           </Button>
-                          <Button 
-                            variant="outline" 
+                          <Button
+                            variant="outline"
                             size="sm"
                             onClick={() => deleteMessage(message._id)}
                             className="text-red-600 hover:text-red-700 flex-1 sm:flex-none text-xs px-2 py-1"
@@ -3810,7 +3928,7 @@ export default function AdminDashboard() {
                     <Image className="h-5 w-5" />
                     <h3 className="text-lg font-semibold">Hero Section</h3>
                   </div>
-                  
+
                   <div className="space-y-4">
                     <div>
                       <Label htmlFor="hero-image-url">Hero Image URL</Label>
@@ -3826,14 +3944,14 @@ export default function AdminDashboard() {
                         Enter the URL of the image you want to display in the hero section
                       </p>
                     </div>
-                    
+
                     {heroImageUrl && (
                       <div className="space-y-2">
                         <Label>Preview</Label>
                         <div className="border rounded-lg p-4 bg-gray-50">
-                          <img 
-                            src={heroImageUrl} 
-                            alt="Hero image preview" 
+                          <img
+                            src={heroImageUrl}
+                            alt="Hero image preview"
                             className="max-w-full h-48 object-cover rounded"
                             onError={(e) => {
                               e.currentTarget.style.display = 'none';
@@ -3847,8 +3965,8 @@ export default function AdminDashboard() {
                         </div>
                       </div>
                     )}
-                    
-                    <Button 
+
+                    <Button
                       onClick={updateSettings}
                       disabled={updatingSettings}
                       className="w-full sm:w-auto"
@@ -3857,14 +3975,14 @@ export default function AdminDashboard() {
                     </Button>
                   </div>
                 </div>
-                
+
                 {/* Logo Settings */}
                 <div className="border-t pt-6">
                   <div className="flex items-center gap-2 mb-4">
                     <Image className="h-5 w-5" />
                     <h3 className="text-lg font-semibold">Logo Settings</h3>
                   </div>
-                  
+
                   <div className="space-y-4">
                     {/* File Upload */}
                     <div>
@@ -3902,14 +4020,14 @@ export default function AdminDashboard() {
                         Enter the URL of the logo image you want to display in the navigation
                       </p>
                     </div>
-                    
+
                     {logoUrl && (
                       <div className="space-y-2">
                         <Label>Preview</Label>
                         <div className="border rounded-lg p-4 bg-gray-50">
-                          <img 
-                            src={logoUrl} 
-                            alt="Logo preview" 
+                          <img
+                            src={logoUrl}
+                            alt="Logo preview"
                             className="max-w-xs h-16 object-contain"
                             onError={(e) => {
                               e.currentTarget.style.display = 'none';
@@ -3923,8 +4041,8 @@ export default function AdminDashboard() {
                         </div>
                       </div>
                     )}
-                    
-                    <Button 
+
+                    <Button
                       onClick={updateLogo}
                       disabled={updatingLogo}
                       className="w-full sm:w-auto"
@@ -3933,21 +4051,21 @@ export default function AdminDashboard() {
                     </Button>
                   </div>
                 </div>
-                
+
                 {/* Account Settings */}
                 <div className="border-t pt-6">
                   <div className="flex items-center gap-2 mb-4">
                     <Key className="h-5 w-5" />
                     <h3 className="text-lg font-semibold">Account Settings</h3>
                   </div>
-                  
+
                   <div className="space-y-4">
                     <div className="flex items-center justify-between p-4 border rounded-lg">
                       <div>
                         <h4 className="font-medium">Change Password</h4>
                         <p className="text-sm text-gray-500">Update your admin account password</p>
                       </div>
-                      <Button 
+                      <Button
                         onClick={() => setShowChangePassword(true)}
                         variant="outline"
                         size="sm"
@@ -4031,7 +4149,7 @@ export default function AdminDashboard() {
                         <option value="active">Active Only</option>
                         <option value="inactive">Inactive Only</option>
                       </select>
-                      <Button 
+                      <Button
                         onClick={() => setShowCreateGDTopic(true)}
                         className="bg-blue-600 hover:bg-blue-700 text-white"
                       >
@@ -4048,13 +4166,13 @@ export default function AdminDashboard() {
                         <MessageSquare className="h-16 w-16 mx-auto mb-4 text-gray-300" />
                         <h3 className="text-lg font-semibold mb-2">No GD Topics Found</h3>
                         <p className="text-sm mb-4">
-                          {gdTopicSearch || gdTopicFilter !== 'all' 
+                          {gdTopicSearch || gdTopicFilter !== 'all'
                             ? 'Try adjusting your search or filter criteria'
                             : 'Create your first GD topic to get started!'
                           }
                         </p>
                         {!gdTopicSearch && gdTopicFilter === 'all' && (
-                          <Button 
+                          <Button
                             onClick={() => setShowCreateGDTopic(true)}
                             className="bg-blue-600 hover:bg-blue-700 text-white"
                           >
@@ -4092,12 +4210,12 @@ export default function AdminDashboard() {
                                     </Badge>
                                   )}
                                 </div>
-                                
+
                                 <h4 className="font-semibold text-xl mb-2 text-gray-900">{topic.title}</h4>
                                 <p className="text-gray-600 text-sm mb-4 line-clamp-2">
                                   {topic.description}
                                 </p>
-                                
+
                                 {topic.tags && topic.tags.length > 0 && (
                                   <div className="flex flex-wrap gap-1 mb-3">
                                     {topic.tags.slice(0, 3).map((tag: string, index: number) => (
@@ -4112,7 +4230,7 @@ export default function AdminDashboard() {
                                     )}
                                   </div>
                                 )}
-                                
+
                                 <div className="flex items-center gap-6 text-xs text-gray-500">
                                   <div className="flex items-center gap-1">
                                     <Calendar className="h-3 w-3" />
@@ -4124,7 +4242,7 @@ export default function AdminDashboard() {
                                   </div>
                                 </div>
                               </div>
-                              
+
                               <div className="flex gap-2 ml-4">
                                 <Button
                                   size="sm"
@@ -4162,7 +4280,7 @@ export default function AdminDashboard() {
       {showChangePassword && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg max-w-md w-full max-h-[90vh] overflow-y-auto">
-            <ChangePasswordForm 
+            <ChangePasswordForm
               onSuccess={() => setShowChangePassword(false)}
               onCancel={() => setShowChangePassword(false)}
             />
@@ -4178,6 +4296,7 @@ export default function AdminDashboard() {
               <div className="flex justify-between items-center mb-6">
                 <h2 className="text-2xl font-bold">Student Details</h2>
                 <Button
+
                   variant="outline"
                   onClick={() => setShowStudentView(false)}
                   className="text-gray-500 hover:text-gray-700"
@@ -4276,6 +4395,83 @@ export default function AdminDashboard() {
                       </div>
                     </div>
                   )}
+
+                  {/* Payment History (multiple transactions) */}
+                  {studentDetails.paymentHistory && studentDetails.paymentHistory.length > 0 && (
+                    <div className="space-y-3 mt-6">
+                      <h3 className="text-lg font-semibold border-b pb-2">Payment History</h3>
+                      <div className="overflow-x-auto">
+                        {/* Filters */}
+                        <div className="flex flex-wrap gap-3 items-center mb-3">
+                          <div className="flex items-center gap-2">
+                            <Label className="text-sm text-gray-600">Course:</Label>
+                            <select
+                              value={paymentFilterCourse}
+                              onChange={(e) => setPaymentFilterCourse(e.target.value)}
+                              className="px-2 py-1 text-xs border rounded"
+                            >
+                              <option value="all">All courses</option>
+                              {Array.from(new Set((studentDetails.paymentHistory || [])
+                                .map((p: any) => p.courseTitle || p.notes?.course || p.notes?.courseId)
+                                .filter((x: any) => !!x)
+                              )).map((c: any) => (
+                                <option key={String(c)} value={String(c)}>{String(c)}</option>
+                              ))}
+                            </select>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Label className="text-sm text-gray-600">Status:</Label>
+                            <select
+                              value={paymentFilterStatus}
+                              onChange={(e) => setPaymentFilterStatus(e.target.value)}
+                              className="px-2 py-1 text-xs border rounded"
+                            >
+                              <option value="all">All</option>
+                              {Array.from(new Set((studentDetails.paymentHistory || [])
+                                .map((p: any) => p.status)
+                                .filter((x: any) => !!x)
+                              )).map((s: any) => (
+                                <option key={String(s)} value={String(s)}>{String(s)}</option>
+                              ))}
+                            </select>
+                          </div>
+                        </div>
+
+                        <table className="min-w-full text-sm">
+                          <thead>
+                            <tr className="text-left text-gray-600">
+                              <th className="py-2 pr-4">Date</th>
+                              <th className="py-2 pr-4">Payment ID</th>
+                              <th className="py-2 pr-4">Order ID</th>
+                              <th className="py-2 pr-4">Course</th>
+                              <th className="py-2 pr-4">Amount</th>
+                              <th className="py-2 pr-4">Status</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {(studentDetails.paymentHistory || [])
+                              .filter((p: any) => (paymentFilterStatus === 'all' || p.status === paymentFilterStatus)
+                                && (paymentFilterCourse === 'all' || (p.courseTitle || p.notes?.course || p.notes?.courseId) === paymentFilterCourse))
+                              .map((p: any) => (
+                                <tr key={p._id} className="border-t">
+                                  <td className="py-2 pr-4 whitespace-nowrap">{new Date(p.createdAt).toLocaleString()}</td>
+                                  <td className="py-2 pr-4 font-mono break-all">{p.paymentId}</td>
+                                  <td className="py-2 pr-4 font-mono break-all">{p.orderId}</td>
+                                  <td className="py-2 pr-4">{p.courseTitle || p.notes?.course || p.notes?.courseId || '—'}</td>
+                                  <td className="py-2 pr-4">₹{p.amount ? (p.amount / 100).toFixed(2) : '—'}</td>
+                                  <td className="py-2 pr-4">
+                                    <Badge variant={p.status === 'captured' ? 'default' : 'secondary'}>
+                                      {p.status || '—'}
+                                    </Badge>
+                                  </td>
+                                </tr>
+                              ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  )}
+
 
                   {/* Actions */}
                   <div className="flex gap-3 pt-4 border-t">
@@ -4430,8 +4626,12 @@ export default function AdminDashboard() {
                     </div>
                     {selectedMessage.company && (
                       <div>
-                        <Label className="text-sm font-medium text-gray-600">Company</Label>
-                        <p className="text-lg">{selectedMessage.company}</p>
+                        <Label className="text-sm font-medium text-gray-600">Mobile</Label>
+                        <p className="text-lg">
+                          <a href={`tel:${selectedMessage.company}`} className="text-blue-600 hover:underline">
+                            {selectedMessage.company}
+                          </a>
+                        </p>
                       </div>
                     )}
                     <div>
@@ -4444,9 +4644,9 @@ export default function AdminDashboard() {
                     <h3 className="text-lg font-semibold border-b pb-2">Status & Priority</h3>
                     <div className="flex items-center gap-2">
                       <Label className="text-sm font-medium text-gray-600">Status:</Label>
-                      <Badge 
+                      <Badge
                         variant={
-                          selectedMessage.status === 'new' ? 'default' : 
+                          selectedMessage.status === 'new' ? 'default' :
                           selectedMessage.status === 'read' ? 'secondary' :
                           selectedMessage.status === 'replied' ? 'outline' : 'destructive'
                         }
@@ -4456,7 +4656,7 @@ export default function AdminDashboard() {
                     </div>
                     <div className="flex items-center gap-2">
                       <Label className="text-sm font-medium text-gray-600">Priority:</Label>
-                      <Badge 
+                      <Badge
                         variant={
                           selectedMessage.priority === 'urgent' ? 'destructive' :
                           selectedMessage.priority === 'high' ? 'default' :
@@ -4545,7 +4745,7 @@ export default function AdminDashboard() {
           <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
             <h3 className="text-lg font-semibold mb-4">Reset Total Revenue</h3>
             <p className="text-gray-600 mb-4">
-              This action will permanently delete all payment records and reset the total revenue to ₹0. 
+              This action will permanently delete all payment records and reset the total revenue to ₹0.
               This action cannot be undone.
             </p>
             <div className="flex gap-3 justify-end">

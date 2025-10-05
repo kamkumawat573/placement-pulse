@@ -6,21 +6,22 @@ import { usePathname } from "next/navigation"
 import { useLogo } from "@/hooks/useLogo"
 import { Button } from "@/components/ui/button"
 import { useAuth } from "@/contexts/auth-context"
-import { 
-  User, 
-  LogOut, 
-  BookOpen, 
-  Home, 
-  Info, 
-  MessageSquare, 
-  Phone, 
-  Menu, 
+import {
+  User,
+  LogOut,
+  BookOpen,
+  Home,
+  Info,
+  MessageSquare,
+  Phone,
+  Menu,
   X,
   ChevronDown,
   Settings,
   Users,
   FileText,
-  GraduationCap
+  GraduationCap,
+  ShoppingCart
 } from "lucide-react"
 import {
   DropdownMenu,
@@ -44,6 +45,8 @@ export function Navigation() {
   const pathname = usePathname()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
+  const [cartCount, setCartCount] = useState<number>(0)
+
   const [admin, setAdmin] = useState<AdminUser | null>(null)
 
   // Handle scroll effect for sticky header
@@ -95,6 +98,31 @@ export function Navigation() {
     }
     checkAdminAuth()
   }, [])
+  // Sync cart count from localStorage and update on events
+  useEffect(() => {
+    const read = () => {
+      try {
+        const raw = localStorage.getItem('cartCourseIds')
+        const ids = raw ? JSON.parse(raw) : []
+        setCartCount(Array.isArray(ids) ? ids.length : 0)
+      } catch {
+        setCartCount(0)
+      }
+    }
+    read()
+    const onStorage = () => read()
+    const onFocus = () => read()
+    const onCartUpdated = () => read()
+    window.addEventListener('storage', onStorage)
+    window.addEventListener('focus', onFocus)
+    window.addEventListener('cartUpdated', onCartUpdated as any)
+    return () => {
+      window.removeEventListener('storage', onStorage)
+      window.removeEventListener('focus', onFocus)
+      window.removeEventListener('cartUpdated', onCartUpdated as any)
+    }
+  }, [])
+
 
   const handleAdminLogout = async () => {
     try {
@@ -129,13 +157,13 @@ export function Navigation() {
     <>
       {/* Floating Navbar */}
       <nav className={`fixed top-4 left-4 right-4 z-50 transition-all duration-500 ease-out ${
-        scrolled 
-          ? 'bg-background/80 backdrop-blur-xl border border-border/30 shadow-2xl shadow-primary/5 scale-[0.98]' 
+        scrolled
+          ? 'bg-background/80 backdrop-blur-xl border border-border/30 shadow-2xl shadow-primary/5 scale-[0.98]'
           : 'bg-background/40 backdrop-blur-xl border border-border/20 shadow-xl shadow-black/10'
       } rounded-2xl`}>
         <div className="container mx-auto px-4 lg:px-6">
           <div className="flex items-center justify-between h-14 lg:h-16">
-            
+
             {/* Logo */}
             <Link
               href="/"
@@ -196,6 +224,23 @@ export function Navigation() {
             </div>
 
             {/* Desktop Auth Section - Right */}
+            <div className="hidden lg:block mr-2">
+              <Link href="/checkout" aria-label={`Open cart with ${cartCount} item${cartCount===1?"":"s"}`}>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="relative hover:bg-primary/10 transition-all duration-200"
+                >
+                  <ShoppingCart className="h-5 w-5" />
+                  {cartCount > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-red-600 text-white text-[10px] leading-none px-1.5 py-0.5 rounded-full min-w-[16px] text-center">
+                      {cartCount}
+                    </span>
+                  )}
+                </Button>
+              </Link>
+            </div>
+
             <div className="hidden lg:flex items-center gap-2 flex-shrink-0">
               {loading ? (
                 <div className="flex items-center gap-2">
@@ -206,9 +251,9 @@ export function Navigation() {
                 <div className="flex items-center gap-2">
                   {/* Admin Dashboard Button */}
                   <Link href="/admin">
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
+                    <Button
+                      variant="outline"
+                      size="sm"
                       className="flex items-center gap-2 hover:bg-primary/10 hover:border-primary transition-all duration-200"
                     >
                       <Settings className="h-4 w-4" />
@@ -219,9 +264,9 @@ export function Navigation() {
                   {/* Admin Profile Dropdown */}
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
+                      <Button
+                        variant="ghost"
+                        size="sm"
                         className="flex items-center gap-2 hover:bg-primary/10 transition-all duration-200"
                       >
                         <div className="w-8 h-8 bg-primary/20 rounded-full flex items-center justify-center">
@@ -246,8 +291,8 @@ export function Navigation() {
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
-                      <DropdownMenuItem 
-                        onClick={handleAdminLogout} 
+                      <DropdownMenuItem
+                        onClick={handleAdminLogout}
                         className="flex items-center gap-2 text-red-600 focus:text-red-600"
                       >
                         <LogOut className="h-4 w-4" />
@@ -261,9 +306,9 @@ export function Navigation() {
                   {/* Dashboard Button */}
                   {user.enrolledCourse && (
                     <Link href="/dashboard">
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
+                      <Button
+                        variant="outline"
+                        size="sm"
                         className="flex items-center gap-2 hover:bg-primary/10 hover:border-primary transition-all duration-200"
                       >
                         <BookOpen className="h-4 w-4" />
@@ -275,9 +320,9 @@ export function Navigation() {
                   {/* User Profile Dropdown */}
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
+                      <Button
+                        variant="ghost"
+                        size="sm"
                         className="flex items-center gap-2 hover:bg-primary/10 transition-all duration-200"
                       >
                         <div className="w-8 h-8 bg-primary/20 rounded-full flex items-center justify-center">
@@ -319,8 +364,8 @@ export function Navigation() {
                         </DropdownMenuItem>
                       )}
                       <DropdownMenuSeparator />
-                      <DropdownMenuItem 
-                        onClick={logout} 
+                      <DropdownMenuItem
+                        onClick={logout}
                         className="flex items-center gap-2 text-red-600 focus:text-red-600"
                       >
                         <LogOut className="h-4 w-4" />
@@ -332,9 +377,9 @@ export function Navigation() {
               ) : (
                 <div className="flex items-center gap-2">
                   <Link href="/auth">
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
+                    <Button
+                      variant="outline"
+                      size="sm"
                       className="hover:bg-primary/10 hover:border-primary transition-all duration-200"
                     >
                       <span className="hidden sm:inline">Sign In</span>
@@ -342,8 +387,8 @@ export function Navigation() {
                     </Button>
                   </Link>
                   <Link href="/auth?mode=signup">
-                    <Button 
-                      size="sm" 
+                    <Button
+                      size="sm"
                       className="bg-gradient-to-r from-primary to-primary/80 hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl hover:shadow-primary/25"
                     >
                       <span className="hidden sm:inline">Enroll Now</span>
@@ -354,8 +399,18 @@ export function Navigation() {
               )}
             </div>
 
-            {/* Mobile/Tablet Menu Button */}
-            <div className="lg:hidden flex-shrink-0">
+            {/* Mobile actions (Cart + Menu) */}
+            <div className="lg:hidden flex items-center gap-1 flex-shrink-0">
+              <Link href="/checkout" aria-label={`Open cart with ${cartCount} item${cartCount===1?"":"s"}`}>
+                <Button variant="ghost" size="sm" className="relative hover:bg-primary/10 transition-all duration-200 p-2">
+                  <ShoppingCart className="h-5 w-5" />
+                  {cartCount > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-red-600 text-white text-[10px] leading-none px-1.5 py-0.5 rounded-full min-w-[16px] text-center">
+                      {cartCount}
+                    </span>
+                  )}
+                </Button>
+              </Link>
               <Button
                 variant="ghost"
                 size="sm"
@@ -376,66 +431,66 @@ export function Navigation() {
 
         {/* Mobile Sidebar Menu */}
         <div className={`lg:hidden transition-all duration-300 ease-in-out ${
-          mobileMenuOpen 
-            ? 'max-h-screen opacity-100' 
+          mobileMenuOpen
+            ? 'max-h-screen opacity-100'
             : 'max-h-0 opacity-0 overflow-hidden'
         }`}>
           <div className="border-t border-border/20 bg-background/60 backdrop-blur-xl rounded-b-2xl">
             <div className="py-4 space-y-1">
-              
+
               {/* Mobile Navigation Links */}
               <div className="space-y-1">
-                <Link 
-                  href="/" 
-                  className={mobileNavLinkClass("/", true)} 
+                <Link
+                  href="/"
+                  className={mobileNavLinkClass("/", true)}
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   <Home className="h-5 w-5" />
                   Home
                 </Link>
-                <Link 
-                  href="/courses" 
-                  className={mobileNavLinkClass("/courses", true)} 
+                <Link
+                  href="/courses"
+                  className={mobileNavLinkClass("/courses", true)}
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   <GraduationCap className="h-5 w-5" />
                   Courses
                 </Link>
-                <Link 
-                  href="/blogs" 
-                  className={mobileNavLinkClass("/blogs", true)} 
+                <Link
+                  href="/blogs"
+                  className={mobileNavLinkClass("/blogs", true)}
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   <FileText className="h-5 w-5" />
                   Blogs
                 </Link>
-                <Link 
-                  href="/features" 
-                  className={mobileNavLinkClass("/features", true)} 
+                <Link
+                  href="/features"
+                  className={mobileNavLinkClass("/features", true)}
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   <Users className="h-5 w-5" />
                   GD Topics
                 </Link>
-                <Link 
-                  href="/about" 
-                  className={mobileNavLinkClass("/about", true)} 
+                <Link
+                  href="/about"
+                  className={mobileNavLinkClass("/about", true)}
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   <Info className="h-5 w-5" />
                   About Us
                 </Link>
-                <Link 
-                  href="/testimonials" 
-                  className={mobileNavLinkClass("/testimonials", true)} 
+                <Link
+                  href="/testimonials"
+                  className={mobileNavLinkClass("/testimonials", true)}
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   <MessageSquare className="h-5 w-5" />
                   Testimonials
                 </Link>
-                <Link 
-                  href="/contact" 
-                  className={mobileNavLinkClass("/contact", true)} 
+                <Link
+                  href="/contact"
+                  className={mobileNavLinkClass("/contact", true)}
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   <Phone className="h-5 w-5" />
@@ -472,9 +527,9 @@ export function Navigation() {
                     {/* Admin Action Buttons */}
                     <div className="space-y-2">
                       <Link href="/admin" onClick={() => setMobileMenuOpen(false)}>
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
+                        <Button
+                          variant="outline"
+                          size="sm"
                           className="w-full justify-start gap-3 h-12"
                         >
                           <Settings className="h-5 w-5" />
@@ -512,9 +567,9 @@ export function Navigation() {
                     <div className="space-y-2">
                       {user.enrolledCourse && (
                         <Link href="/dashboard" onClick={() => setMobileMenuOpen(false)}>
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
+                          <Button
+                            variant="outline"
+                            size="sm"
                             className="w-full justify-start gap-3 h-12"
                           >
                             <BookOpen className="h-5 w-5" />
@@ -523,9 +578,9 @@ export function Navigation() {
                         </Link>
                       )}
                       <Link href="/profile" onClick={() => setMobileMenuOpen(false)}>
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
+                        <Button
+                          variant="outline"
+                          size="sm"
                           className="w-full justify-start gap-3 h-12"
                         >
                           <Settings className="h-5 w-5" />
@@ -534,8 +589,8 @@ export function Navigation() {
                       </Link>
                       {!user.enrolledCourse && (
                         <Link href="/enroll" onClick={() => setMobileMenuOpen(false)}>
-                          <Button 
-                            size="sm" 
+                          <Button
+                            size="sm"
                             className="w-full justify-start gap-3 h-12 bg-gradient-to-r from-primary to-primary/80"
                           >
                             <BookOpen className="h-5 w-5" />
@@ -560,17 +615,17 @@ export function Navigation() {
                 ) : (
                   <div className="space-y-3">
                     <Link href="/auth" onClick={() => setMobileMenuOpen(false)}>
-                      <Button 
-                        variant="outline" 
-                        size="lg" 
+                      <Button
+                        variant="outline"
+                        size="lg"
                         className="w-full h-12 hover:bg-primary/10"
                       >
                         Sign In
                       </Button>
                     </Link>
                     <Link href="/auth?mode=signup" onClick={() => setMobileMenuOpen(false)}>
-                      <Button 
-                        size="lg" 
+                      <Button
+                        size="lg"
                         className="w-full h-12 bg-gradient-to-r from-primary to-primary/80 shadow-lg"
                       >
                         Enroll Now

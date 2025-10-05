@@ -2,26 +2,27 @@ import type { NextRequest } from "next/server"
 import { connectToDatabase } from "@/lib/mongodb"
 import { UserModel } from "@/lib/models/User"
 import { PaymentModel } from "@/lib/models/Payment"
+import { CourseModel } from "@/lib/models/Course"
 import Razorpay from "razorpay"
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
-    const { user, verification, courseId } = body || {}
+    const { user, verification, courseIds } = body || {}
 
     if (!user?.email) {
       return new Response(JSON.stringify({ error: "Missing user email" }), { status: 400 })
     }
 
-    if (!courseId) {
-      return new Response(JSON.stringify({ error: "Missing course ID" }), { status: 400 })
+    if (!courseIds || !Array.isArray(courseIds) || courseIds.length === 0) {
+      return new Response(JSON.stringify({ error: "Missing or invalid course IDs" }), { status: 400 })
     }
 
     if (!verification?.razorpay_order_id || !verification?.razorpay_payment_id || !verification?.razorpay_signature) {
       return new Response(JSON.stringify({ error: "Missing payment verification" }), { status: 400 })
     }
 
-    // Reuse the verify endpoint logic inline to enforce server-side verification before enrollment
+    // Verify payment signature
     const keySecret = process.env.RAZORPAY_KEY_SECRET
     if (!keySecret) {
       return new Response(JSON.stringify({ error: "Missing Razorpay config" }), { status: 500 })
@@ -36,7 +37,32 @@ export async function POST(req: NextRequest) {
       return new Response(JSON.stringify({ error: "Payment verification failed" }), { status: 400 })
     }
 
-    // Optionally fetch payment details from Razorpay to store more info
+    // Verify all courses exist and are active
+    await connectToDatabase()
+    const courses = await CourseModel.find({ 
+      _id: { $in: courseIds }, 
+      isActive: true 
+    })
+    
+    if (courses.length !== courseIds.length) {
+      return new Response(JSON.stringify({ error: "One or more courses not found or inactive" }), { status: 400 })
+    }
+
+    // Check if user is already enrolled in any of these courses
+    const existingUser = await UserModel.findOne(
+      user.id ? { _id: user.id } : { email: user.email }
+    )
+    
+    if (existingUser) {
+      const alreadyEnrolled = existingUser.enrolledCourses?.some(
+        (enrollment: any) => courseIds.includes(enrollment.courseId.toString())
+      )
+      if (alreadyEnrolled) {
+        return new Response(JSON.stringify({ error: "User already enrolled in one or more of these courses" }), { status: 409 })
+      }
+    }
+
+    // Fetch payment details from Razorpay
     let fetchedPayment: any = null
     try {
       const keyId = process.env.RAZORPAY_KEY_ID
@@ -45,7 +71,6 @@ export async function POST(req: NextRequest) {
         const rzp = new Razorpay({ key_id: keyId, key_secret: keySecret })
         const payment = await rzp.payments.fetch(verification.razorpay_payment_id)
         fetchedPayment = payment
-        await connectToDatabase()
         await PaymentModel.create({
           email: user.email,
           orderId: verification.razorpay_order_id,
@@ -63,22 +88,8 @@ export async function POST(req: NextRequest) {
       // ignore payment fetch failure, continue enrollment if signature valid
     }
 
-    // Upsert in Mongo and mark enrolled for specific course
-    await connectToDatabase()
-    const query = user.id ? { _id: user.id } : { email: user.email }
-    
-    // Check if user is already enrolled in this course
-    const existingUser = await UserModel.findOne(query)
-    if (existingUser) {
-      const alreadyEnrolled = existingUser.enrolledCourses?.some(
-        (enrollment: any) => enrollment.courseId.toString() === courseId
-      )
-      if (alreadyEnrolled) {
-        return new Response(JSON.stringify({ error: "User already enrolled in this course" }), { status: 409 })
-      }
-    }
-
-    const enrollmentData = {
+    // Create enrollment data for all courses
+    const enrollmentData = courseIds.map(courseId => ({
       courseId: courseId,
       enrolledAt: new Date(),
       progress: 0,
@@ -86,8 +97,10 @@ export async function POST(req: NextRequest) {
       paymentId: verification?.razorpay_payment_id,
       orderId: verification?.razorpay_order_id,
       status: 'active'
-    }
+    }))
 
+    // Update user with all course enrollments
+    const query = user.id ? { _id: user.id } : { email: user.email }
     const updated = await UserModel.findOneAndUpdate(
       query,
       {
@@ -99,7 +112,7 @@ export async function POST(req: NextRequest) {
           transactionId: fetchedPayment?.id || verification?.razorpay_payment_id || null,
         },
         $push: {
-          enrolledCourses: enrollmentData
+          enrolledCourses: { $each: enrollmentData }
         },
         $setOnInsert: {
           passwordHash: "", // placeholder if user somehow didn't sign up; ideally enrollment requires login
@@ -128,12 +141,15 @@ export async function POST(req: NextRequest) {
           progress: updated.progress,
           transactionId: updated.transactionId ?? null,
         },
+        enrolledCourses: courses.map(course => ({
+          id: course._id.toString(),
+          title: course.title,
+          enrolledAt: new Date()
+        }))
       }),
       { status: 200 }
     )
   } catch (err: any) {
-    return new Response(JSON.stringify({ error: err?.message || "Failed to enroll" }), { status: 500 })
+    return new Response(JSON.stringify({ error: err?.message || "Failed to enroll in courses" }), { status: 500 })
   }
 }
-
-

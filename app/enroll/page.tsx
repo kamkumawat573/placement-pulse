@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -17,6 +17,7 @@ import { CheckCircle, CreditCard, Clock, Users, Award, Loader2, RefreshCw } from
 export default function EnrollPage() {
   const { user } = useAuth()
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [mounted, setMounted] = useState(false)
   const [processing, setProcessing] = useState(false)
   const [refreshing, setRefreshing] = useState(false)
@@ -57,19 +58,66 @@ export default function EnrollPage() {
       setRefreshing(true)
     }
     
+    console.log('Fetching course data for courseId:', courseId)
+    
     try {
-      // Fetch the first active course from the admin panel with cache busting
-      const response = await fetch(`/api/courses?t=${Date.now()}`, {
-        cache: 'no-store',
-        headers: {
-          'Cache-Control': 'no-cache',
-          'Pragma': 'no-cache'
+      let response
+      if (courseId) {
+        // Fetch specific course data
+        console.log('Fetching specific course:', `/api/courses/${courseId}`)
+        response = await fetch(`/api/courses/${courseId}?t=${Date.now()}`, {
+          cache: 'no-store',
+          headers: {
+            'Cache-Control': 'no-cache',
+            'Pragma': 'no-cache'
+          }
+        })
+        
+        // If specific course API fails, fallback to general courses API
+        if (!response.ok) {
+          console.log('Specific course API failed, falling back to general courses API')
+          response = await fetch(`/api/courses?t=${Date.now()}`, {
+            cache: 'no-store',
+            headers: {
+              'Cache-Control': 'no-cache',
+              'Pragma': 'no-cache'
+            }
+          })
         }
-      })
+      } else {
+        // Fallback to general courses API
+        console.log('Fetching general courses')
+        response = await fetch(`/api/courses?t=${Date.now()}`, {
+          cache: 'no-store',
+          headers: {
+            'Cache-Control': 'no-cache',
+            'Pragma': 'no-cache'
+          }
+        })
+      }
+      
       if (response.ok) {
         const data = await response.json()
-        if (data.courses && data.courses.length > 0) {
-          const course = data.courses[0] // Get the first active course
+        console.log('Course data received:', data)
+        let course
+        
+        if (courseId && data.course) {
+          // Single course response
+          course = data.course
+          console.log('Using specific course:', course)
+        } else if (courseId && data.courses && data.courses.length > 0) {
+          // Fallback: find the specific course in the courses list
+          course = data.courses.find((c: any) => c.id === courseId)
+          console.log('Found specific course in list:', course)
+        } else {
+          // Multiple courses response
+          if (data.courses && data.courses.length > 0) {
+            course = data.courses[0] // Get the first active course
+            console.log('Using first course from list:', course)
+          }
+        }
+        
+        if (course) {
           setCourseId(course.id) // Store the actual course ID
           setCoursePrice(course.price)
           setCourseInfo({
@@ -117,34 +165,63 @@ export default function EnrollPage() {
 
   useEffect(() => {
     setMounted(true)
-    fetchCourseData()
     
-    // Set up periodic refresh for course data (every 30 seconds)
-    const interval = setInterval(() => {
-      fetchCourseData()
-    }, 30000)
+    // Get courseId from URL parameters
+    const urlCourseId = searchParams.get('courseId')
+    if (urlCourseId) {
+      setCourseId(urlCourseId)
+      console.log('CourseId from URL:', urlCourseId)
+    }
     
     // Load Razorpay Checkout script
     const script = document.createElement("script")
     script.src = "https://checkout.razorpay.com/v1/checkout.js"
     script.async = true
     document.body.appendChild(script)
+    
     if (!user) {
       router.push("/auth")
-    } else if (user.enrolledCourse) {
-      router.push("/dashboard")
     }
 
     return () => {
-      // Cleanup interval
-      clearInterval(interval)
       // Cleanup Razorpay script
       const existingScript = document.getElementById('razorpay-checkout-script')
       if (existingScript) {
         existingScript.remove()
       }
     }
-  }, [user, router])
+  }, [user, router, searchParams])
+
+  // Separate useEffect to check if user is already enrolled in this specific course
+  useEffect(() => {
+    if (user && courseId) {
+      console.log('Checking enrollment for courseId:', courseId)
+      console.log('User enrolledCourses:', user.enrolledCourses)
+      const isEnrolled = user.enrolledCourses?.some((enrollment: any) => String(enrollment.courseId) === String(courseId))
+      console.log('Is enrolled in this course:', isEnrolled)
+
+      if (isEnrolled) {
+        console.log('User already enrolled in this course, redirecting to dashboard')
+        router.push("/dashboard")
+      }
+    }
+  }, [user, courseId, router])
+
+  // Separate useEffect for fetching course data when courseId changes
+  useEffect(() => {
+    if (courseId) {
+      fetchCourseData()
+      
+      // Set up periodic refresh for course data (every 30 seconds)
+      const interval = setInterval(() => {
+        fetchCourseData()
+      }, 30000)
+      
+      return () => {
+        clearInterval(interval)
+      }
+    }
+  }, [courseId])
 
   if (!mounted || !user) {
     return (
@@ -213,6 +290,7 @@ export default function EnrollPage() {
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
                 user: { id: user.id, email: user.email, name: user.name },
+                courseId: courseId,
                 verification: {
                   razorpay_order_id: response.razorpay_order_id,
                   razorpay_payment_id: response.razorpay_payment_id,
@@ -223,7 +301,7 @@ export default function EnrollPage() {
             const data = await enrollRes.json()
             if (!enrollRes.ok || !data.success) throw new Error(data.error || "Verification failed")
 
-            const updatedUser = { ...user, enrolledCourse: true, progress: 0 }
+            const updatedUser = data.user
             localStorage.setItem("user", JSON.stringify(updatedUser))
             setProcessing(false)
             router.push("/dashboard?enrolled=true")
@@ -421,6 +499,9 @@ export default function EnrollPage() {
 
                   <p className="text-xs text-muted-foreground text-center mt-2">
                     You will be redirected to Razorpay to securely complete your payment.
+                  </p>
+                  <p className="text-xs text-muted-foreground text-center mt-1">
+                    After payment, you'll be redirected to the dashboard. If you don't see your enrollment immediately, please refresh the page and log in again.
                   </p>
                 </CardContent>
               </Card>

@@ -314,15 +314,19 @@ export default function ContactPage() {
                       </div>
                     </div>
                     <div>
-                      <label htmlFor="company" className="block text-sm font-medium mb-2">
-                        Company Name
+                      <label htmlFor="phone" className="block text-sm font-medium mb-2">
+                        Mobile Number
                       </label>
                       <Input
-                        id="company"
+                        id="phone"
                         name="company"
+                        type="tel"
+                        inputMode="numeric"
+                        pattern="^[0-9]{10}$"
+                        maxLength={10}
                         value={formData.company}
                         onChange={handleInputChange}
-                        placeholder="Your Company"
+                        placeholder="Enter 10-digit mobile number"
                         className="transition-all duration-200 focus:scale-105"
                       />
                     </div>

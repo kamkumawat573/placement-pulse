@@ -10,6 +10,15 @@ interface User {
   name: string
   mobile?: string
   enrolledCourse?: boolean
+  enrolledCourses?: Array<{
+    courseId: string
+    enrolledAt: string
+    progress: number
+    transactionId?: string
+    paymentId?: string
+    orderId?: string
+    status: string
+  }>
   progress?: number
 }
 

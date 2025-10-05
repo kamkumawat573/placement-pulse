@@ -32,7 +32,15 @@ export async function POST(req: NextRequest) {
     cookieStore.set("auth_token", token, { httpOnly: true, sameSite: "lax", path: "/" })
 
     return new Response(
-      JSON.stringify({ id: user._id.toString(), email: user.email, name: user.name, mobile: user.mobile, enrolledCourse: user.enrolledCourse, progress: user.progress }),
+      JSON.stringify({ 
+        id: user._id.toString(), 
+        email: user.email, 
+        name: user.name, 
+        mobile: user.mobile, 
+        enrolledCourse: user.enrolledCourse, 
+        enrolledCourses: user.enrolledCourses || [],
+        progress: user.progress 
+      }),
       { status: 200 }
     )
   } catch (err: any) {

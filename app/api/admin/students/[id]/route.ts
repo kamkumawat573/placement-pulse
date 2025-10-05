@@ -3,6 +3,7 @@ import { connectToDatabase } from '@/lib/mongodb';
 import { verifyAdmin } from '@/lib/admin-auth';
 import { UserModel } from '@/lib/models/User';
 import { PaymentModel } from '@/lib/models/Payment';
+import { CourseModel } from '@/lib/models/Course';
 
 export async function GET(
   request: NextRequest,
@@ -29,26 +30,52 @@ export async function GET(
       );
     }
 
-    // Get payment details if transactionId exists
+    // Collect full payment history for this student (multi-course payments)
     let paymentDetails = null;
-    if (student.transactionId && student.transactionId !== 'ADMIN_ENROLLED') {
-      try {
-        paymentDetails = await PaymentModel.findOne({ 
-          $or: [
-            { paymentId: student.transactionId },
-            { userId: student._id }
-          ]
-        }).sort({ createdAt: -1 });
-      } catch (error) {
-        console.error('Error fetching payment details:', error);
+    let paymentHistory = [] as any[];
+    try {
+      // Latest payment detail preserved for backward-compat UI
+      paymentDetails = await PaymentModel.findOne({
+        $or: [
+          { userId: student._id },
+          { email: student.email }
+        ]
+      }).sort({ createdAt: -1 });
+
+      // Full history (descending)
+      paymentHistory = await PaymentModel.find({
+        $or: [
+          { userId: student._id },
+          { email: student.email }
+        ]
+      }).sort({ createdAt: -1 }).lean();
+
+      // Enrich payments with course title when notes.courseId is present
+      const courseIds = Array.from(new Set(
+        (paymentHistory || [])
+          .map((p: any) => p?.notes?.courseId)
+          .filter((x: any) => !!x)
+          .map((x: any) => String(x))
+      ));
+      if (courseIds.length > 0) {
+        const courses = await CourseModel.find({ _id: { $in: courseIds } }).select('title').lean();
+        const courseMap: Record<string, string> = {};
+        courses.forEach((c: any) => { courseMap[String(c._id)] = c.title; });
+        paymentHistory = paymentHistory.map((p: any) => ({
+          ...p,
+          courseTitle: p?.notes?.course ? p.notes.course : (p?.notes?.courseId ? courseMap[String(p.notes.courseId)] : undefined)
+        }));
       }
+    } catch (error) {
+      console.error('Error fetching payment details:', error);
     }
 
     return NextResponse.json({
       success: true,
       student: {
         ...student.toObject(),
-        paymentDetails
+        paymentDetails,
+        paymentHistory,
       }
     });
   } catch (error) {

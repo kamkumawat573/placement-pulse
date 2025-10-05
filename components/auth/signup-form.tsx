@@ -44,7 +44,8 @@ export function SignupForm({ onToggleMode, onSuccess }: SignupFormProps) {
 
     const result = await signup(email, password, name, mobile, recaptchaToken)
     if (result.success) {
-      onSuccess()
+      // Redirect to courses page after successful signup
+      router.push("/courses")
     } else {
       if (result.error?.includes("Email already in use") || result.error?.includes("Mobile already in use")) {
         setError("Account already exists. Please sign in.")

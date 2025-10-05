@@ -45,31 +45,35 @@ export default function CoursesPage() {
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("all")
 
-// Hardcoded course (1:1 Mock Interview)-------------------------------------------------------------------------------------------------------------------------------
-  const HARDCODED_COURSE: Course = {
-    id: "hardcoded-1-1-mock-interview",
-    title: "1:1 Mock interview",
-    description: "Personalized one-on-one mock interview with expert feedback.",
-    category: "Mock Interview",
-    imageUrl: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=400&h=300&fit=crop",
-    price: String(99 * 100), // stored in paise to match existing display logic
-    originalPrice: String(200 * 100),
-    discount: "50% OFF",
-    level: "Beginner - Advanced",
-    rating: "4.9",
-    reviews: "120",
-    students: "1,000+",
-    enrollFormUrl: "https://forms.gle/7ABmEt4gVtL34nxq6",
-    features: [
-      "Customized Mock Interview",
-      "Feedback for Improvement",
-      "Tips for Group Discussion"
-    ]
-  }
-//---------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  // Cart state (localStorage)
+  const [cart, setCart] = useState<string[]>([])
   useEffect(() => {
-    // Show hardcoded course immediately, then fetch from API
-    setCourses([HARDCODED_COURSE])
+    try {
+      const raw = localStorage.getItem('cartCourseIds')
+      setCart(raw ? JSON.parse(raw) : [])
+    } catch {
+      setCart([])
+    }
+  }, [])
+  const addToCart = (id: string) => {
+    const next = Array.from(new Set([...(cart||[]).map(String), String(id)]))
+    setCart(next)
+    try {
+      localStorage.setItem('cartCourseIds', JSON.stringify(next))
+      window.dispatchEvent(new Event('cartUpdated'))
+    } catch {}
+  }
+  const removeFromCart = (id: string) => {
+    const next = (cart||[]).filter(x => String(x) !== String(id))
+    setCart(next)
+    try {
+      if (next.length > 0) localStorage.setItem('cartCourseIds', JSON.stringify(next))
+      else localStorage.removeItem('cartCourseIds')
+      window.dispatchEvent(new Event('cartUpdated'))
+    } catch {}
+  }
+
+  useEffect(() => {
     fetchCourses()
   }, [])
 
@@ -77,7 +81,7 @@ export default function CoursesPage() {
     if (isManualRefresh) {
       setRefreshing(true)
     }
-    
+
     try {
       const response = await fetch('/api/courses', {
         cache: 'no-store',
@@ -88,19 +92,11 @@ export default function CoursesPage() {
       })
       if (response.ok) {
         const data = await response.json()
-        const fetched: Course[] = data.courses || []
-        // Append hardcoded course to the list (ensure it's present once)
-        const hasHardcoded = fetched.some(c => c.id === HARDCODED_COURSE.id)
-        const merged = hasHardcoded ? fetched : [...fetched, HARDCODED_COURSE]
-        setCourses(merged)
-      } else {
-        // If API not ok, show at least the hardcoded course
-        setCourses([HARDCODED_COURSE])
+        setCourses(data.courses || [])
       }
     } catch (error) {
       console.error('Error fetching courses:', error)
-      // On error, still show hardcoded course
-      setCourses([HARDCODED_COURSE])
+      setCourses([])
     } finally {
       setLoading(false)
       if (isManualRefresh) {
@@ -114,13 +110,13 @@ export default function CoursesPage() {
   }
 
   const filteredCourses = courses.filter(course => {
-    const matchesSearch = !searchTerm || 
+    const matchesSearch = !searchTerm ||
       (course.title || course.caption || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
       (course.description || '').toLowerCase().includes(searchTerm.toLowerCase())
-    
-    const matchesCategory = selectedCategory === 'all' || 
+
+    const matchesCategory = selectedCategory === 'all' ||
       (course.category || '').toLowerCase() === selectedCategory.toLowerCase()
-    
+
     return matchesSearch && matchesCategory
   })
 
@@ -190,14 +186,19 @@ export default function CoursesPage() {
         </div>
       </section>
 
-      
+
 
       {/* Courses Grid */}
       <section className="py-8 sm:py-12">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           {filteredCourses.length > 0 ? (
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {filteredCourses.map((course, index) => (
+              {filteredCourses.map((course, index) => {
+                console.log('Rendering course:', course.id, course.title)
+                console.log('User enrolledCourses:', user?.enrolledCourses)
+                const isEnrolled = user?.enrolledCourses?.some((enrollment: any) => String(enrollment.courseId) === String(course.id))
+                console.log('Is enrolled in this course:', isEnrolled)
+                return (
                 <Card
                   key={course.id}
                   className="group hover:shadow-xl transition-all duration-300 hover:scale-102 bg-white border border-gray-200 shadow-md hover:shadow-lg"
@@ -232,11 +233,11 @@ export default function CoursesPage() {
                         </Badge>
                       )}
                     </div>
-                    
+
                     <h3 className="font-bold text-sm mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors duration-300">
                       {course.title || course.caption}
                     </h3>
-                    
+
                     <div className="flex items-center gap-2 mb-2">
                       <div className="flex items-center gap-1">
                         <Star className="h-3 w-3 text-yellow-500 fill-current" />
@@ -262,19 +263,7 @@ export default function CoursesPage() {
                         )}
                       </div>
                     </div>
-                    {Array.isArray(course.features) && course.features.length > 0 && (
-                      <div className="mb-3">
-                        <ul className="space-y-1">
-                          {course.features.map((feature, idx) => (
-                            <li key={idx} className="flex items-start gap-2 text-xs text-gray-700">
-                              <CheckCircle2 className="h-3.5 w-3.5 text-green-600 mt-0.5" />
-                              <span className="line-clamp-1">{feature}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                    
+
                     <div className="mt-3">
                       {course.enrollFormUrl ? (
                         <a href={course.enrollFormUrl} target="_blank" rel="noopener noreferrer">
@@ -283,7 +272,7 @@ export default function CoursesPage() {
                             <ArrowRight className="ml-1 h-3 w-3" />
                           </Button>
                         </a>
-                      ) : user?.enrolledCourse ? (
+                      ) : user?.enrolledCourses?.some((enrollment: any) => String(enrollment.courseId) === String(course.id)) ? (
                         <Link href="/dashboard">
                           <Button className="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-3 rounded-md shadow-md hover:shadow-lg transition-all duration-300 text-sm">
                             <span>Continue Study</span>
@@ -291,17 +280,39 @@ export default function CoursesPage() {
                           </Button>
                         </Link>
                       ) : (
-                        <Link href={user ? "/enroll" : "/auth?mode=signup"}>
-                          <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-3 rounded-md shadow-md hover:shadow-lg transition-all duration-300 text-sm">
-                            <span>Enroll Now</span>
-                            <ArrowRight className="ml-1 h-3 w-3" />
-                          </Button>
-                        </Link>
+                        <div className="flex gap-2">
+                          <Link href={user ? `/enroll?courseId=${course.id}` : "/auth?mode=signup"} className="flex-1">
+                            <Button
+                              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-3 rounded-md shadow-md hover:shadow-lg transition-all duration-300 text-sm"
+                            >
+                              <span>Enroll Now</span>
+                              <ArrowRight className="ml-1 h-3 w-3" />
+                            </Button>
+                          </Link>
+                          {(cart || []).includes(String(course.id)) ? (
+                            <Button
+                              variant="outline"
+                              className="w-28"
+                              onClick={(e) => { e.preventDefault(); removeFromCart(String(course.id)); }}
+                            >
+                              Remove
+                            </Button>
+                          ) : (
+                            <Button
+                              variant="outline"
+                              className="w-28"
+                              onClick={(e) => { e.preventDefault(); addToCart(String(course.id)); }}
+                            >
+                              Add to Cart
+                            </Button>
+                          )}
+                        </div>
                       )}
                     </div>
                   </CardContent>
                 </Card>
-              ))}
+                )
+              })}
             </div>
           ) : loading ? (
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
@@ -324,13 +335,13 @@ export default function CoursesPage() {
               </div>
               <h3 className="text-lg font-semibold mb-2 text-gray-700">No courses found</h3>
               <p className="text-gray-500 mb-4 text-sm">
-                {searchTerm || selectedCategory !== 'all' 
+                {searchTerm || selectedCategory !== 'all'
                   ? 'Try adjusting your search or filter criteria'
                   : 'No courses have been published yet'
                 }
               </p>
               {(searchTerm || selectedCategory !== 'all') && (
-                <Button 
+                <Button
                   onClick={() => {
                     setSearchTerm('')
                     setSelectedCategory('all')
@@ -615,11 +626,11 @@ export default function CoursesPage() {
             {/* Footer buttons */}
             <div className="grid grid-cols-3">
               <div className="px-3 sm:px-4 py-3 bg-white" />
-              <div className="px-3 sm:px-4 py-3">
-                <a href={HARDCODED_COURSE.enrollFormUrl || '#'} target="_blank" rel="noopener noreferrer">
-                  <Button className="w-full bg-pink-600 hover:bg-pink-700 text-white">ENROLL NOW</Button>
-                </a>
-              </div>
+                <div className="px-3 sm:px-4 py-3">
+                  <a href="https://forms.gle/7ABmEt4gVtL34nxq6" target="_blank" rel="noopener noreferrer">
+                    <Button className="w-full bg-pink-600 hover:bg-pink-700 text-white">ENROLL NOW</Button>
+                  </a>
+                </div>
               <div className="px-3 sm:px-4 py-3">
                 <Link href="/enroll">
                   <Button className="w-full bg-pink-600 hover:bg-pink-700 text-white">ENROLL NOW</Button>

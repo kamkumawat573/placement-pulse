@@ -16,6 +16,13 @@ const AnnouncementSchema = new Schema(
       enum: ["general", "course", "payment", "system"],
       default: "general"
     },
+    // Optional course targeting for course-specific announcements
+    courseId: {
+      type: Schema.Types.ObjectId,
+      ref: "Course",
+      required: false,
+      default: null
+    },
     priority: {
       type: String,
       enum: ["low", "medium", "high", "urgent"],

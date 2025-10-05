@@ -26,7 +26,15 @@ export async function POST(req: NextRequest) {
     const user = await UserModel.create({ email, name, passwordHash, mobile })
 
     return new Response(
-      JSON.stringify({ id: user._id.toString(), email: user.email, name: user.name, mobile: user.mobile, enrolledCourse: user.enrolledCourse, progress: user.progress }),
+      JSON.stringify({ 
+        id: user._id.toString(), 
+        email: user.email, 
+        name: user.name, 
+        mobile: user.mobile, 
+        enrolledCourse: user.enrolledCourse, 
+        enrolledCourses: user.enrolledCourses || [],
+        progress: user.progress 
+      }),
       { status: 201 }
     )
   } catch (err: any) {

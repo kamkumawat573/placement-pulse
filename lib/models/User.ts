@@ -11,6 +11,16 @@ const UserSchema = new Schema(
     state: { type: String },
     country: { type: String },
     zip: { type: String },
+    enrolledCourses: [{ 
+      courseId: { type: Schema.Types.ObjectId, ref: 'Course', required: true },
+      enrolledAt: { type: Date, default: Date.now },
+      progress: { type: Number, default: 0 },
+      transactionId: { type: String },
+      paymentId: { type: String },
+      orderId: { type: String },
+      status: { type: String, enum: ['active', 'completed', 'cancelled'], default: 'active' }
+    }],
+    // Keep for backward compatibility
     enrolledCourse: { type: Boolean, default: false },
     progress: { type: Number, default: 0 },
     transactionId: { type: String, default: null },

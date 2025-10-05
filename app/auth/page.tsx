@@ -22,19 +22,8 @@ export default function AuthPage() {
   }, [searchParams])
 
   const handleSuccess = () => {
-    const saved = (() => {
-      try {
-        return JSON.parse(localStorage.getItem("user") || "null")
-      } catch {
-        return null
-      }
-    })()
-    const u = saved || user
-    if (u?.enrolledCourse) {
-      router.push("/dashboard")
-    } else {
-      router.push("/enroll")
-    }
+    // After successful signup, redirect to courses page
+    router.push("/courses")
   }
 
   return (

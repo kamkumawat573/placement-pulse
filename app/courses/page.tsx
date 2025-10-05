@@ -567,7 +567,7 @@ export default function CoursesPage() {
 
             {[
               { label: 'No. of Interview', left: '1', right: '3', type: 'text' },
-              { label: 'No. of Group Discussion', left: false, right: '1', type: 'text' },
+              { label: 'No. of Group Discussions', left: "X", right: '1', type: 'text' },
               { label: 'CV Curation', left: false, right: true, type: 'bool' },
               { label: 'Feedback on Interview', left: true, right: true, type: 'bool' },
               { label: 'Recording of Interview', left: false, right: true, type: 'bool' }
@@ -582,7 +582,11 @@ export default function CoursesPage() {
                       <span aria-label="No" className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-white">✕</span>
                     )
                   ) : (
-                    <span className="font-semibold text-slate-800">{row.left}</span>
+                    row.left === 'X' ? (
+                      <span aria-label="No" className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-white">✕</span>
+                    ) : (
+                      <span className="font-semibold text-slate-800">{row.left}</span>
+                    )
                   )}
                 </div>
                 <div className="px-3 sm:px-4 py-3 border-t border-gray-200 text-center">
@@ -593,7 +597,11 @@ export default function CoursesPage() {
                       <span aria-label="No" className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-white">✕</span>
                     )
                   ) : (
-                    <span className="font-semibold text-slate-800">{row.right}</span>
+                    row.right === 'X' ? (
+                      <span aria-label="No" className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-white">✕</span>
+                    ) : (
+                      <span className="font-semibold text-slate-800">{row.right}</span>
+                    )
                   )}
                 </div>
               </div>
@@ -601,41 +609,68 @@ export default function CoursesPage() {
 
             {/* Core feature lists */}
             <div className="grid grid-cols-3 text-xs sm:text-sm">
-              <div className="px-3 sm:px-4 py-3 border-t border-gray-200 font-semibold text-gray-700">Core Feature</div>
+              <div className="px-3 sm:px-4 py-3 border-t border-gray-200 font-semibold text-gray-700">Core Features</div>
               <div className="px-3 sm:px-4 py-3 border-t border-gray-200 text-gray-700">
                 <div className="flex justify-center">
-                  <ul className="list-disc list-inside space-y-1 text-left">
-                  <li>1:1 Personal Interview</li>
-                  <li>Feedback for improvement</li>
-                  </ul>
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 rounded-md bg-sky-50/80 dark:bg-sky-950/30 border border-sky-100/80 dark:border-sky-900/40 px-2.5 py-1.5 shadow-sm">
+                      <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-sky-500 text-white">
+                        <CheckCircle2 className="h-3.5 w-3.5" />
+                      </span>
+                      <span className="text-slate-800 dark:text-slate-200 text-[13px]">1:1 Personal Interview</span>
+                    </div>
+                    <div className="flex items-center gap-2 rounded-md bg-sky-50/80 dark:bg-sky-950/30 border border-sky-100/80 dark:border-sky-900/40 px-2.5 py-1.5 shadow-sm">
+                      <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-sky-500 text-white">
+                        <CheckCircle2 className="h-3.5 w-3.5" />
+                      </span>
+                      <span className="text-slate-800 dark:text-slate-200 text-[13px]">Feedback for improvement</span>
+                    </div>
+                  </div>
                 </div>
               </div>
               <div className="px-3 sm:px-4 py-3 border-t border-gray-200 text-gray-700">
                 <div className="flex justify-center">
-                  <ul className="list-disc list-inside space-y-1 text-left">
-                  <li>1:1 Personal Interview (3)</li>
-                  <li>Feedback for improvement</li>
-                  <li>1 Group Discussion</li>
-                  <li>1:1 CV Curation</li>
-                  <li>Detailed Analysis of PI</li>
-                  </ul>
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 rounded-md bg-sky-50/80 dark:bg-sky-950/30 border border-sky-100/80 dark:border-sky-900/40 px-2.5 py-1.5 shadow-sm">
+                      <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-sky-500 text-white">
+                        <CheckCircle2 className="h-3.5 w-3.5" />
+                      </span>
+                      <span className="text-slate-800 dark:text-slate-200 text-[13px]">1:1 Personal Interview (3)</span>
+                    </div>
+                    <div className="flex items-center gap-2 rounded-md bg-sky-50/80 dark:bg-sky-950/30 border border-sky-100/80 dark:border-sky-900/40 px-2.5 py-1.5 shadow-sm">
+                      <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-sky-500 text-white">
+                        <CheckCircle2 className="h-3.5 w-3.5" />
+                      </span>
+                      <span className="text-slate-800 dark:text-slate-200 text-[13px]">Feedback for improvement</span>
+                    </div>
+                    <div className="flex items-center gap-2 rounded-md bg-sky-50/80 dark:bg-sky-950/30 border border-sky-100/80 dark:border-sky-900/40 px-2.5 py-1.5 shadow-sm">
+                      <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-sky-500 text-white">
+                        <CheckCircle2 className="h-3.5 w-3.5" />
+                      </span>
+                      <span className="text-slate-800 dark:text-slate-200 text-[13px]">1 Group Discussion</span>
+                    </div>
+                    <div className="flex items-center gap-2 rounded-md bg-sky-50/80 dark:bg-sky-950/30 border border-sky-100/80 dark:border-sky-900/40 px-2.5 py-1.5 shadow-sm">
+                      <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-sky-500 text-white">
+                        <CheckCircle2 className="h-3.5 w-3.5" />
+                      </span>
+                      <span className="text-slate-800 dark:text-slate-200 text-[13px]">1:1 CV Curation</span>
+                    </div>
+                    <div className="flex items-center gap-2 rounded-md bg-sky-50/80 dark:bg-sky-950/30 border border-sky-100/80 dark:border-sky-900/40 px-2.5 py-1.5 shadow-sm">
+                      <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-sky-500 text-white">
+                        <CheckCircle2 className="h-3.5 w-3.5" />
+                      </span>
+                      <span className="text-slate-800 dark:text-slate-200 text-[13px]">Detailed Analysis of PI</span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
 
-            {/* Footer buttons */}
+            {/* Footer (no buttons as requested) */}
             <div className="grid grid-cols-3">
               <div className="px-3 sm:px-4 py-3 bg-white" />
-                <div className="px-3 sm:px-4 py-3">
-                  <a href="https://forms.gle/7ABmEt4gVtL34nxq6" target="_blank" rel="noopener noreferrer">
-                    <Button className="w-full bg-pink-600 hover:bg-pink-700 text-white">ENROLL NOW</Button>
-                  </a>
-                </div>
-              <div className="px-3 sm:px-4 py-3">
-                <Link href="/enroll">
-                  <Button className="w-full bg-pink-600 hover:bg-pink-700 text-white">ENROLL NOW</Button>
-                </Link>
-              </div>
+              <div className="px-3 sm:px-4 py-3" />
+              <div className="px-3 sm:px-4 py-3" />
             </div>
           </div>
         </div>

@@ -23,42 +23,42 @@ export default function AboutPage() {
   const [isAutoPlaying, setIsAutoPlaying] = useState(true)
   const [isMobile, setIsMobile] = useState(false)
   const intervalRef = useRef<NodeJS.Timeout | null>(null)
-
+// ---------------------------------------------------------------------------------------------
   const team: ProfileData[] = [
     {
       id: 1,
       name: "Kamlesh Kumawat",
-      title: "Investment Banker",
-      subtitle: "SRCC GBO’26 | BHU’23",
-      image: "https://cdn.corenexis.com/files/b/1365881168.jpg",
+      title: "Founder",
+      subtitle: "",
+      image: "https://cdn.corenexis.com/files/b/5648343168.jpg",
       linkedinUrl: "https://linkedin.com/in/kamleshh-kumawat"
     },
     { 
       id: 2,
       name: "Adarsh Vijayvargiya",
-      title: "Financial Analyst",
-      subtitle: "Presales Consultant @ HCL Tech || Great Lakes Institute of Management, Chennai || PGDM (Marketing & Operations)",
-      image: "https://cdn.corenexis.com/files/b/3979688168.jpg",
-      linkedinUrl: "https://linkedin.com/in/john-smith"
+      title: "Co-Founder",
+      subtitle: "",
+      image: "https://cdn.corenexis.com/files/b/1182911168.jpg",
+      linkedinUrl: "https://linkedin.com/in/adarsh-vijayvargiya-27484a21a"
     },
     {
       id: 3,
-      name: "Sarah Johnson",
-      title: "Investment Advisor",
-      subtitle: "Ex VP at Morgan Stanley",
-      image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=400&fit=crop&crop=face",
-      linkedinUrl: "https://linkedin.com/in/sarah-johnson"
+      name: "Gaurav Shukla",
+      title: "Co-Founder",
+      subtitle: "",
+      image: "https://cdn.corenexis.com/files/b/7883948168.jpg",
+      linkedinUrl: "https://linkedin.com/in/gaurav-shukla-58b436178"
     },
     {
       id: 4,
-      name: "Michael Brown",
-      title: "Portfolio Manager",
-      subtitle: "Ex Director at JP Morgan",
-      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=face",
-      linkedinUrl: "https://linkedin.com/in/michael-brown"
+      name: "Mukul Singh",
+      title: "Co-Founder",
+      subtitle: "",
+      image: "https://cdn.corenexis.com/files/b/3299261168.jpg",
+      linkedinUrl: "https://linkedin.com/in/mukul-singh-13655837a"
     }
   ]
-
+// ----------------------------------------------------------------------------------------------------------------------
   useEffect(() => {
     // Check initial screen size
     const checkScreenSize = () => {

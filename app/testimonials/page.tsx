@@ -149,60 +149,60 @@ export default function TestimonialsPage() {
 
   const featuredTestimonials = [
     {
-      name: "Priya Sharma",
+      name: "Amit Singh",
       role: "MBA Student",
-      company: "IIM Ahmedabad",
+      company: "from IIM Amritsar",
       content:
-        "Placement Pulse transformed my GD-PI preparation completely. The structured approach and real-time feedback helped me crack McKinsey's case interview. The mentorship from IIM alumni was invaluable.",
+        "Placement Pulse really simplified things for me. The GD practice made me realize my common mistakes, and the resume audit was so detailed. Honestly, I didn’t expect this level of feedback at such an affordable price.",
       rating: 5,
-      image: "PS",
-      results: "Secured McKinsey Offer",
-    },
-    {
-      name: "Arjun Patel",
-      role: "MBA Student",
-      company: "IIM Bangalore",
-      content:
-        "The platform's comprehensive coverage of consulting, finance, and tech roles helped me prepare for multiple profiles. I landed offers from BCG, Goldman Sachs, and Google. The mock interviews were game-changers.",
-      rating: 5,
-      image: "AP",
+      image: "AS",
       results: "Multiple Top Offers",
     },
     {
-      name: "Sneha Reddy",
+      name: "Sidharth Bishnoi",
       role: "MBA Student",
-      company: "IIM Calcutta",
+      company: "from IIM Vizag",
       content:
-        "As someone from a non-engineering background, I was nervous about technical interviews. Placement Pulse's structured approach and peer learning helped me crack Amazon's PM role. The community support was incredible.",
+        "What I liked most was how practical everything was. The alumni actually told me what I was doing wrong in my answers, and their tips were super easy to apply. I felt more confident immediately.",
       rating: 5,
-      image: "SR",
-      results: "Amazon PM Role",
+      image: "SB",
+      results: "Multiple Top Offers",
+    },
+    {
+      name: "Saumya Gupta",
+      role: "MBA Student",
+      company: "from IIFT Delhi",
+      content:
+        "Before this, I kept fumbling in mock interviews. After two sessions here, I learned how to structure my thoughts and avoid over-explaining. That small change made a big difference in my final placements.",
+      rating: 5,
+      image: "SG",
+      results: "Multiple Top Offers",
     },
   ]
 
   const testimonials = [
     {
-      name: "Rahul Kumar",
+      name: "Pragati Jha",
       role: "MBA Student",
-      company: "IIM Indore",
+      company: "IIM Raipur",
       content:
-        "The GD preparation sessions were exceptional. I went from being nervous to leading discussions confidently. The feedback from seniors helped me improve my communication skills significantly.",
+        "During my SIP prep, I was completely lost. Placement Pulse helped me with simple frameworks for GDs and really useful interview feedback. I honestly wish I had found this earlier.",
       rating: 5,
     },
     {
-      name: "Ananya Singh",
+      name: "Aditi Chaudhary",
       role: "MBA Student",
-      company: "IIM Lucknow",
+      company: "FORE",
       content:
-        "Placement Pulse's case study preparation was comprehensive. The structured approach to solving business cases helped me crack BCG's final round. The practice sessions were invaluable.",
+        "The alumni sessions stood out for me. Instead of generic advice, they shared exactly what worked for them during placements. It felt genuine and gave me confidence that I was preparing in the right way.",
       rating: 5,
     },
     {
-      name: "Vikram Joshi",
+      name: "Vikas Yadav",
       role: "MBA Student",
-      company: "IIM Kozhikode",
+      company: "BIMTECH",
       content:
-        "The platform's coverage of different industries and roles helped me prepare for consulting, finance, and tech interviews. I secured offers from Deloitte, JP Morgan, and Microsoft.",
+        "I wasn’t sure about joining at first, but the mock GD sessions changed my mind. They actually pointed out habits I never realized I had, like cutting people off too soon. Small things, but they matter.",
       rating: 5,
     },
     {
@@ -214,25 +214,24 @@ export default function TestimonialsPage() {
       rating: 5,
     },
     {
-      name: "Rohit Agarwal",
+      name: "Raghav Khandelwal",
       role: "MBA Student",
-      company: "IIM Raipur",
+      company: "IIFT Delhi",
       content:
-        "The mock interview sessions with industry experts were game-changers. The personalized feedback helped me identify my weak areas and improve significantly. I cracked Goldman Sachs' final round.",
+        "The resume review was eye-opening. Just a few edits made my profile look so much sharper. I even got compliments on it during interviews, which never happened before.",
       rating: 5,
     },
     {
-      name: "Divya Mehta",
+      name: "Shreeyanka Das",
       role: "MBA Student",
-      company: "IIM Trichy",
-      content:
-        "The platform's focus on both technical and soft skills preparation was perfect. The resume building workshops and LinkedIn optimization sessions helped me stand out in the crowd.",
+      company: "IIM Indore",
+      content:"Placement Pulse is different because it’s not just theory. The feedback was practical, to the point, and from people who actually went through placements recently. That made me trust the process.",
       rating: 5,
     },
   ]
 
   const stats = [
-    { icon: Users, number: "1,500+", label: "MBA Students", color: "text-blue-500" },
+    { icon: Users, number: "300+", label: "MBA Students", color: "text-blue-500" },
     { icon: Star, number: "4.9/5", label: "Student Rating", color: "text-yellow-500" },
     { icon: TrendingUp, number: "95%", label: "Placement Success", color: "text-green-500" },
     { icon: Award, number: "500+", label: "Dream Offers", color: "text-purple-500" },

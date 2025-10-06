@@ -8,6 +8,7 @@ import { Clock, User, Tag, Calendar, ArrowRight, Search, Filter } from "lucide-r
 import { Input } from "@/components/ui/input"
 import Link from "next/link"
 
+import { useRouter } from "next/navigation"
 interface Blog {
   id: string;
   blogId?: string;
@@ -27,6 +28,8 @@ export default function BlogsPage() {
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("all")
+  const router = useRouter()
+
 
   useEffect(() => {
     fetchBlogs()
@@ -47,13 +50,13 @@ export default function BlogsPage() {
   }
 
   const filteredBlogs = blogs.filter(blog => {
-    const matchesSearch = !searchTerm || 
+    const matchesSearch = !searchTerm ||
       (blog.title || blog.caption || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
       (blog.content || '').toLowerCase().includes(searchTerm.toLowerCase())
-    
-    const matchesCategory = selectedCategory === 'all' || 
+
+    const matchesCategory = selectedCategory === 'all' ||
       (blog.category || '').toLowerCase() === selectedCategory.toLowerCase()
-    
+
     return matchesSearch && matchesCategory
   })
 
@@ -140,7 +143,8 @@ export default function BlogsPage() {
               {filteredBlogs.map((blog, index) => (
                 <Card
                   key={blog.id}
-                  className="group hover:shadow-2xl transition-all duration-500 animate-fade-in-up hover:scale-105 bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-blue-200/50"
+                  onClick={() => router.push(`/blogs/${blog.id}`)}
+                  className="group cursor-pointer hover:shadow-2xl transition-all duration-500 animate-fade-in-up hover:scale-105 bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-blue-200/50"
                   style={{ animationDelay: `${index * 0.1}s` }}
                 >
                   {(blog.coverImage || blog.imageUrl) && (
@@ -173,24 +177,24 @@ export default function BlogsPage() {
                         <span>{blog.createdAt ? new Date(blog.createdAt).toLocaleDateString() : 'Recent'}</span>
                       </div>
                     </div>
-                    
+
                     <h3 className="font-bold text-lg mb-3 line-clamp-2 group-hover:text-blue-600 transition-colors duration-300">
                       {blog.title || blog.caption}
                     </h3>
-                    
+
                     {blog.content && (
                       <p className="text-gray-600 text-sm mb-4 line-clamp-3 group-hover:text-gray-700 transition-colors duration-300">
                         {blog.content.substring(0, 120)}...
                       </p>
                     )}
-                    
+
                     <div className="flex items-center gap-2 mb-4">
                       <User className="h-4 w-4 text-gray-400 group-hover:text-blue-500 transition-colors duration-300" />
                       <span className="text-sm text-gray-500 group-hover:text-gray-700 transition-colors duration-300">
                         {blog.author || 'Admin'}
                       </span>
                     </div>
-                    
+
                     {blog.tags && blog.tags.length > 0 && (
                       <div className="flex flex-wrap gap-1">
                         {blog.tags.slice(0, 3).map((tag, tagIndex) => (
@@ -219,13 +223,13 @@ export default function BlogsPage() {
               </div>
               <h3 className="text-2xl font-semibold mb-4 text-gray-700">No blogs found</h3>
               <p className="text-gray-500 mb-8 max-w-md mx-auto">
-                {searchTerm || selectedCategory !== 'all' 
+                {searchTerm || selectedCategory !== 'all'
                   ? 'Try adjusting your search or filter criteria'
                   : 'No blogs have been published yet'
                 }
               </p>
               {(searchTerm || selectedCategory !== 'all') && (
-                <Button 
+                <Button
                   onClick={() => {
                     setSearchTerm('')
                     setSelectedCategory('all')
@@ -248,7 +252,7 @@ export default function BlogsPage() {
           <div className="absolute bottom-10 right-10 w-16 h-16 bg-purple-200/30 rounded-full animate-float" style={{animationDelay: '1s'}}></div>
           <div className="absolute top-1/2 left-1/2 w-12 h-12 bg-cyan-200/30 rounded-full animate-pulse" style={{animationDelay: '2s'}}></div>
         </div>
-        
+
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
           <div className="max-w-3xl mx-auto">
             <h2 className="text-4xl sm:text-5xl font-bold mb-6 bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 bg-clip-text text-transparent animate-fade-in-up">
@@ -257,7 +261,7 @@ export default function BlogsPage() {
             <p className="text-xl text-gray-600 dark:text-gray-300 mb-8 animate-fade-in-up [animation-delay:0.2s]">
               Get the latest insights and tutorials delivered to your inbox
             </p>
-            
+
           </div>
         </div>
       </section>

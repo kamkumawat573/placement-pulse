@@ -238,6 +238,19 @@ export default function CoursesPage() {
                       {course.title || course.caption}
                     </h3>
 
+
+                        {Array.isArray(course.features) && course.features.length > 0 && (
+                          <div className="flex flex-wrap gap-1.5 mb-3">
+                            {course.features.map((feat, i) => (
+                              <span key={i} className="inline-flex items-center gap-1 rounded-full bg-sky-50 dark:bg-sky-950/30 border border-sky-100 dark:border-sky-900/40 text-sky-700 dark:text-sky-300 px-2 py-0.5 text-[10px]">
+                                <CheckCircle2 className="h-3 w-3" />
+                                <span className="line-clamp-1 max-w-[140px]">{feat}</span>
+                              </span>
+                            ))}
+                           
+                          </div>
+                        )}
+
                     <div className="flex items-center gap-2 mb-2">
                       <div className="flex items-center gap-1">
                         <Star className="h-3 w-3 text-yellow-500 fill-current" />

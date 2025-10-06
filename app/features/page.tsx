@@ -9,6 +9,8 @@ import Link from "next/link"
 import { Navigation } from "@/components/navigation"
 import { Input } from "@/components/ui/input"
 
+import { useRouter } from "next/navigation"
+
 interface GDTopic {
   _id: string
   title: string
@@ -32,6 +34,8 @@ export default function FeaturesPage() {
   const [selectedCategory, setSelectedCategory] = useState("all")
   const [selectedDifficulty, setSelectedDifficulty] = useState("all")
   const [showTrending, setShowTrending] = useState(false)
+  const router = useRouter()
+
   const [refreshing, setRefreshing] = useState(false)
 
 
@@ -52,7 +56,7 @@ export default function FeaturesPage() {
       } else {
         setLoading(true)
       }
-      
+
       const params = new URLSearchParams({
         page: '1',
         limit: '12',
@@ -61,7 +65,7 @@ export default function FeaturesPage() {
         ...(showTrending && { trending: 'true' }),
         ...(searchTerm && { search: searchTerm })
       })
-      
+
       const response = await fetch(`/api/gd-topics?${params}`, {
         cache: 'no-store',
         headers: {
@@ -69,7 +73,7 @@ export default function FeaturesPage() {
           'Pragma': 'no-cache'
         }
       })
-      
+
       if (response.ok) {
         const data = await response.json()
         setTopics(data.topics || [])
@@ -94,8 +98,8 @@ export default function FeaturesPage() {
   }
 
   const categories = [
-    'all', 'Business', 'Technology', 'Social Issues', 'Economics', 
-    'Politics', 'Environment', 'Education', 'Healthcare', 'Sports', 
+    'all', 'Business', 'Technology', 'Social Issues', 'Economics',
+    'Politics', 'Environment', 'Education', 'Healthcare', 'Sports',
     'Entertainment', 'General Knowledge'
   ]
 
@@ -130,7 +134,7 @@ export default function FeaturesPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-purple-50/30 dark:from-slate-900 dark:to-slate-800">
       <Navigation />
-      
+
       {/* Hero Section */}
       <section className="py-12 sm:py-16 pt-20 lg:pt-24 relative overflow-hidden">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
@@ -197,7 +201,7 @@ export default function FeaturesPage() {
                 </Button>
               </div>
             </div>
-            
+
             <div className="flex flex-wrap gap-2 mb-6">
               <div className="flex gap-2 flex-wrap">
                 <span className="text-sm font-medium text-gray-700 dark:text-gray-300 mr-2">Category:</span>
@@ -213,7 +217,7 @@ export default function FeaturesPage() {
                 ))}
               </div>
           </div>
-            
+
             <div className="flex flex-wrap gap-2">
               <div className="flex gap-2 flex-wrap">
                 <span className="text-sm font-medium text-gray-700 dark:text-gray-300 mr-2">Difficulty:</span>
@@ -246,10 +250,11 @@ export default function FeaturesPage() {
             </div>
           ) : topics.length > 0 ? (
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {topics.map((topic, index) => (
+              {topics.map((topic) => (
                 <Card
                   key={topic._id}
-                  className="group hover:shadow-xl transition-all duration-300 hover:scale-102 bg-white border border-gray-200 shadow-md hover:shadow-lg"
+                  onClick={() => router.push(`/features/${topic._id}`)}
+                  className="group cursor-pointer hover:shadow-xl transition-all duration-300 hover:scale-102 bg-white border border-gray-200 shadow-md hover:shadow-lg"
                 >
                   <div className="relative overflow-hidden rounded-t-lg">
                     {topic.imageUrl ? (
@@ -304,7 +309,7 @@ export default function FeaturesPage() {
                     <CardDescription className="text-sm leading-relaxed mb-4 line-clamp-3">
                       {topic.description}
                     </CardDescription>
-                    
+
                     {topic.tags.length > 0 && (
                       <div className="flex flex-wrap gap-1 mb-4">
                         {topic.tags.slice(0, 3).map((tag, tagIndex) => (
@@ -322,14 +327,14 @@ export default function FeaturesPage() {
                         )}
                       </div>
                     )}
-                    
+
                     <div className="flex items-center justify-end text-sm text-gray-500 mb-4">
                       <div className="flex items-center gap-1">
                         <Calendar className="h-3 w-3" />
                         <span>{new Date(topic.createdAt).toLocaleDateString()}</span>
                       </div>
                     </div>
-                    
+
                   </CardContent>
                 </Card>
               ))}
@@ -348,7 +353,7 @@ export default function FeaturesPage() {
               </p>
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
                 {(searchTerm || selectedCategory !== 'all' || selectedDifficulty !== 'all' || showTrending) && (
-                  <Button 
+                  <Button
                     onClick={() => {
                       setSearchTerm('')
                       setSelectedCategory('all')
@@ -360,7 +365,7 @@ export default function FeaturesPage() {
                     Clear Filters
                   </Button>
                 )}
-                <Button 
+                <Button
                   onClick={handleManualRefresh}
                   disabled={refreshing}
                   variant="outline"
@@ -370,7 +375,7 @@ export default function FeaturesPage() {
                   {refreshing ? 'Refreshing...' : 'Refresh'}
                 </Button>
               </div>
-          
+
             </div>
           )}
         </div>

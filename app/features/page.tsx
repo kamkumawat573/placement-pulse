@@ -343,7 +343,7 @@ export default function FeaturesPage() {
               <p className="text-gray-500 mb-4 text-sm">
                 {searchTerm || selectedCategory !== 'all' || selectedDifficulty !== 'all' || showTrending
                   ? 'Try adjusting your search or filter criteria'
-                  : 'No GD topics have been published yet. Admins can add topics through the admin panel.'
+                  : 'No GD topics have been published yet. '
                 }
               </p>
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
@@ -370,13 +370,7 @@ export default function FeaturesPage() {
                   {refreshing ? 'Refreshing...' : 'Refresh'}
                 </Button>
               </div>
-              {!searchTerm && selectedCategory === 'all' && selectedDifficulty === 'all' && !showTrending && (
-                <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                  <p className="text-sm text-blue-700">
-                    <strong>For Admins:</strong> To add GD topics, go to the admin panel and use the GD Topics management section.
-                  </p>
-                </div>
-              )}
+          
             </div>
           )}
         </div>

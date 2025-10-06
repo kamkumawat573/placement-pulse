@@ -48,7 +48,7 @@ export default function EnrollPage() {
     ],
     modules: [] as Array<{week: string, title: string, lessons: string, duration: string}>,
     testimonials: [] as Array<{name: string, role: string, content: string, rating: number, avatar: string}>,
-    students: "2,500+",
+    students: "300+",
     rating: 4.5,
     reviews: "150+"
   })

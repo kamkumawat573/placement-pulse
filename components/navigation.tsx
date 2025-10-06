@@ -357,7 +357,7 @@ export function Navigation() {
                       </DropdownMenuItem>
                       {!user.enrolledCourse && (
                         <DropdownMenuItem asChild>
-                          <Link href="/enroll" className="flex items-center gap-2">
+                          <Link href="/courses" className="flex items-center gap-2">
                             <BookOpen className="h-4 w-4" />
                             Enroll in Course
                           </Link>
@@ -588,7 +588,7 @@ export function Navigation() {
                         </Button>
                       </Link>
                       {!user.enrolledCourse && (
-                        <Link href="/enroll" onClick={() => setMobileMenuOpen(false)}>
+                        <Link href="/courses" onClick={() => setMobileMenuOpen(false)}>
                           <Button
                             size="sm"
                             className="w-full justify-start gap-3 h-12 bg-gradient-to-r from-primary to-primary/80"

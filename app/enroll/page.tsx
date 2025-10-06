@@ -332,7 +332,7 @@ export default function EnrollPage() {
       <div className="container mx-auto px-4 py-8 pt-24">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold mb-4">Complete Your MBA Placement Enrollment</h1>
+            <h1 className="text-4xl font-bold mb-4">Complete Your MBA Training & Placement Enrollment</h1>
             <p className="text-xl text-muted-foreground">{courseInfo.shortDescription}</p>
           </div>
 
@@ -467,6 +467,7 @@ export default function EnrollPage() {
                       <span>Course Price</span>
                       <span>{courseDataLoaded ? `₹${courseInfo.price}.00` : 'Loading...'}</span>
                     </div>
+{/* ///////////////////////////////////////////////////////////////////////////////////////////////////////////////// */}
                     <div className="flex items-center justify-between">
                       <span>Tax</span>
                       <span>₹0.00</span>
@@ -477,7 +478,7 @@ export default function EnrollPage() {
                       <span>{courseDataLoaded ? `₹${courseInfo.price}.00` : 'Loading...'}</span>
                     </div>
                   </div>
-
+{/* //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// */}
                   <Button onClick={handleEnrollment} disabled={processing || !courseDataLoaded} className="w-full mt-2" size="lg">
                     {processing ? (
                       <>

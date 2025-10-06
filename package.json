@@ -57,7 +57,7 @@
     "googleapis": "^160.0.0",
     "jsonwebtoken": "^9.0.2",
     "lucide-react": "^0.454.0",
-    "mongoose": "^8.18.1",
+    "mongoose": "^8.19.0",
     "multer": "^2.0.2",
     "next": "^14.2.33",
     "next-themes": "^0.4.6",

@@ -27,7 +27,7 @@ export const env = {
   MONGODB_URI: process.env.MONGODB_URI || 'mongodb://localhost:27017/placementpulse',
   
   // JWT
-  JWT_SECRET: process.env.JWT_SECRET || 'fallback-secret-key',
+  JWT_SECRET: process.env.JWT_SECRET ,
   
   // Razorpay
   RAZORPAY_KEY_ID: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,

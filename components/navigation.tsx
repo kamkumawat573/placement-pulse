@@ -577,7 +577,7 @@ export function Navigation() {
                           </Button>
                         </Link>
                       )}
-                      <Link href="/profile" onClick={() => setMobileMenuOpen(false)}>
+                      {/* <Link href="/profile" onClick={() => setMobileMenuOpen(false)}>
                         <Button
                           variant="outline"
                           size="sm"
@@ -586,7 +586,7 @@ export function Navigation() {
                           <Settings className="h-5 w-5" />
                           Profile Settings
                         </Button>
-                      </Link>
+                      </Link> */}
                       {!user.enrolledCourse && (
                         <Link href="/courses" onClick={() => setMobileMenuOpen(false)}>
                           <Button

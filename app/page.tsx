@@ -939,7 +939,7 @@ export default function HomePage() {
                 <Youtube className="h-4 w-4 sm:h-5 sm:w-5" />
               </a>
               <a 
-                href="https://instagram.com/placementpulse" 
+                href="https://instagram.com/placementpulse_" 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="p-2 rounded-full bg-muted hover:bg-primary hover:text-primary-foreground transition-all duration-300 hover:scale-110 hover:shadow-lg"

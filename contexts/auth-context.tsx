@@ -24,13 +24,15 @@ interface User {
 
 interface AuthContextType {
   user: User | null
-  login: (email: string, password: string, recaptchaToken?: string) => Promise<boolean>
+  login: (email: string, password: string) => Promise<boolean>
+  // login: (email: string, password: string, recaptchaToken?: string) => Promise<boolean>
+  
   signup: (
     email: string,
     password: string,
     name: string,
     mobile?: string,
-    recaptchaToken?: string,
+    // recaptchaToken?: string,
   ) => Promise<{ success: boolean; error?: string }>
   logout: () => Promise<void>
   loading: boolean
@@ -95,13 +97,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     initializeAuth()
   }, [])
 
-  const login = async (email: string, password: string, recaptchaToken?: string): Promise<boolean> => {
+  // const login = async (email: string, password: string, recaptchaToken?: string): Promise<boolean> => {
+  
+  const login = async (email: string, password: string): Promise<boolean> => {
     setLoading(true)
     try {
       const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password, recaptchaToken }),
+        // body: JSON.stringify({ email, password, recaptchaToken }),
+        body: JSON.stringify({ email, password }),
+        
       })
       if (!res.ok) return false
       const userData = await res.json()
@@ -122,14 +128,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     password: string,
     name: string,
     mobile?: string,
-    recaptchaToken?: string,
+    // recaptchaToken?: string,
   ): Promise<{ success: boolean; error?: string }> => {
     setLoading(true)
     try {
       const res = await fetch("/api/auth/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password, name, mobile, recaptchaToken }),
+        body: JSON.stringify({ email, password, name, mobile}),
+        // body: JSON.stringify({ email, password, name, mobile, recaptchaToken }),
+        
       })
       if (!res.ok) {
         try {

@@ -1031,9 +1031,3 @@ export default function EnrollPage() {
     </div>
   )
 }
-
-        </div>
-      </div>
-    </div>
-  )
-}

@@ -3,13 +3,15 @@ import bcrypt from 'bcryptjs';
 import { connectToDatabase } from '@/lib/mongodb';
 import Admin from '@/lib/models/Admin';
 import { generateAdminToken } from '@/lib/admin-auth';
-import { verifyRecaptcha } from '@/lib/recaptcha';
+// import { verifyRecaptcha } from '@/lib/recaptcha';
 
 export async function POST(request: NextRequest) {
   try {
     await connectToDatabase();
     
-    const { email, password, recaptchaToken } = await request.json();
+    const { email, password} = await request.json();
+    // const { email, password, recaptchaToken } = await request.json();
+    
     
     if (!email || !password) {
       return NextResponse.json(
@@ -19,13 +21,13 @@ export async function POST(request: NextRequest) {
     }
 
     // Verify reCAPTCHA
-    const isValidRecaptcha = await verifyRecaptcha(recaptchaToken);
-    if (!isValidRecaptcha) {
-      return NextResponse.json(
-        { error: 'reCAPTCHA verification failed' },
-        { status: 400 }
-      );
-    }
+    // const isValidRecaptcha = await verifyRecaptcha(recaptchaToken);
+    // if (!isValidRecaptcha) {
+    //   return NextResponse.json(
+    //     { error: 'reCAPTCHA verification failed' },
+    //     { status: 400 }
+    //   );
+    // }
 
     // Find admin by email
     const admin = await Admin.findOne({ email: email.toLowerCase() });

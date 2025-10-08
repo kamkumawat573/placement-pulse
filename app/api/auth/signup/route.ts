@@ -2,19 +2,21 @@ import type { NextRequest } from "next/server"
 import bcrypt from "bcryptjs"
 import { connectToDatabase } from "@/lib/mongodb"
 import { UserModel } from "@/lib/models/User"
-import { verifyRecaptcha } from "@/lib/recaptcha"
+// import { verifyRecaptcha } from "@/lib/recaptcha"
 
 export async function POST(req: NextRequest) {
   try {
-    const { email, password, name, mobile, recaptchaToken } = await req.json()
+    const { email, password, name, mobile} = await req.json()
+    // const { email, password, name, mobile, recaptchaToken } = await req.json()
+    
     if (!email || !password) return new Response(JSON.stringify({ error: "Missing credentials" }), { status: 400 })
     if (!mobile) return new Response(JSON.stringify({ error: "Mobile is required" }), { status: 400 })
 
     // Verify reCAPTCHA
-    const isValidRecaptcha = await verifyRecaptcha(recaptchaToken)
-    if (!isValidRecaptcha) {
-      return new Response(JSON.stringify({ error: "reCAPTCHA verification failed" }), { status: 400 })
-    }
+    // const isValidRecaptcha = await verifyRecaptcha(recaptchaToken)
+    // if (!isValidRecaptcha) {
+    //   return new Response(JSON.stringify({ error: "reCAPTCHA verification failed" }), { status: 400 })
+    // }
 
     await connectToDatabase()
     const existingEmail = await UserModel.findOne({ email })

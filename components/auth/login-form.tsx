@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { useAuth } from "@/contexts/auth-context"
 import { Loader2, ArrowLeft, Home } from "lucide-react"
-import { ReCaptcha, ReCaptchaRef } from "@/components/ui/recaptcha"
+// import { ReCaptcha, ReCaptchaRef } from "@/components/ui/recaptcha"
 
 interface LoginFormProps {
   onToggleMode: () => void
@@ -21,19 +21,19 @@ export function LoginForm({ onToggleMode, onSuccess }: LoginFormProps) {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState("")
-  const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null)
+  // const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null)
   const { login, loading } = useAuth()
-  const recaptchaRef = useRef<ReCaptchaRef>(null)
+  // const recaptchaRef = useRef<ReCaptchaRef>(null)
   const router = useRouter()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError("")
 
-    if (!recaptchaToken) {
-      setError("Please complete the reCAPTCHA verification.")
-      return
-    }
+    // if (!recaptchaToken) {
+    //   setError("Please complete the reCAPTCHA verification.")
+    //   return
+    // }
 
     try {
       // First try admin login
@@ -42,7 +42,9 @@ export function LoginForm({ onToggleMode, onSuccess }: LoginFormProps) {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email, password, recaptchaToken }),
+        body: JSON.stringify({ email, password}),
+        // body: JSON.stringify({ email, password, recaptchaToken }),
+        
       });
 
       if (adminResponse.ok) {
@@ -52,7 +54,9 @@ export function LoginForm({ onToggleMode, onSuccess }: LoginFormProps) {
       }
 
       // If admin login fails, try regular user login
-      const success = await login(email, password, recaptchaToken)
+      const success = await login(email, password)
+      // const success = await login(email, password, recaptchaToken)
+      
       if (success) {
         onSuccess()
       } else {
@@ -64,16 +68,16 @@ export function LoginForm({ onToggleMode, onSuccess }: LoginFormProps) {
     }
   }
 
-  const handleRecaptchaChange = (token: string | null) => {
-    setRecaptchaToken(token)
-    if (error && token) {
-      setError("")
-    }
-  }
+  // const handleRecaptchaChange = (token: string | null) => {
+  //   setRecaptchaToken(token)
+  //   if (error && token) {
+  //     setError("")
+  //   }
+  // }
 
-  const handleRecaptchaExpire = () => {
-    setRecaptchaToken(null)
-  }
+  // const handleRecaptchaExpire = () => {
+  //   setRecaptchaToken(null)
+  // }
 
   return (
     <Card className="w-full max-w-md">
@@ -118,7 +122,7 @@ export function LoginForm({ onToggleMode, onSuccess }: LoginFormProps) {
               required
             />
           </div>
-          <div className="flex justify-center">
+          {/* <div className="flex justify-center">
             <ReCaptcha
               ref={recaptchaRef}
               siteKey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"}
@@ -127,9 +131,10 @@ export function LoginForm({ onToggleMode, onSuccess }: LoginFormProps) {
               theme="light"
               size="normal"
             />
-          </div>
+          </div> */}
           {error && <div className="text-sm text-destructive bg-destructive/10 p-3 rounded-md">{error}</div>}
-          <Button type="submit" className="w-full" disabled={loading || !recaptchaToken}>
+          <Button type="submit" className="w-full" disabled={loading}>
+             {/* <Button type="submit" className="w-full" disabled={loading || !recaptchaToken}> */}
             {loading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />

@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { useAuth } from "@/contexts/auth-context"
 import { Loader2, ArrowLeft, Home } from "lucide-react"
-import { ReCaptcha, ReCaptchaRef } from "@/components/ui/recaptcha"
+// import { ReCaptcha, ReCaptchaRef } from "@/components/ui/recaptcha"
 
 interface SignupFormProps {
   onToggleMode: () => void
@@ -23,7 +23,7 @@ export function SignupForm({ onToggleMode, onSuccess }: SignupFormProps) {
   const [name, setName] = useState("")
   const [mobile, setMobile] = useState("")
   const [error, setError] = useState("")
-  const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null)
+  // const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null)
   const { signup, loading } = useAuth()
   const recaptchaRef = useRef<ReCaptchaRef>(null)
   const router = useRouter()
@@ -32,17 +32,18 @@ export function SignupForm({ onToggleMode, onSuccess }: SignupFormProps) {
     e.preventDefault()
     setError("")
 
-    if (!recaptchaToken) {
-      setError("Please complete the reCAPTCHA verification.")
-      return
-    }
+    // if (!recaptchaToken) {
+    //   setError("Please complete the reCAPTCHA verification.")
+    //   return
+    // }
 
     if (password.length < 6) {
       setError("Password must be at least 6 characters long")
       return
     }
 
-    const result = await signup(email, password, name, mobile, recaptchaToken)
+    const result = await signup(email, password, name, mobile)
+      // const result = await signup(email, password, name, mobile, recaptchaToken)
     if (result.success) {
       // Redirect to courses page after successful signup
       router.push("/courses")
@@ -55,16 +56,16 @@ export function SignupForm({ onToggleMode, onSuccess }: SignupFormProps) {
     }
   }
 
-  const handleRecaptchaChange = (token: string | null) => {
-    setRecaptchaToken(token)
-    if (error && token) {
-      setError("")
-    }
-  }
+  // const handleRecaptchaChange = (token: string | null) => {
+  //   setRecaptchaToken(token)
+  //   if (error && token) {
+  //     setError("")
+  //   }
+  // }
 
-  const handleRecaptchaExpire = () => {
-    setRecaptchaToken(null)
-  }
+  // const handleRecaptchaExpire = () => {
+  //   setRecaptchaToken(null)
+  // }
 
   return (
     <Card className="w-full max-w-md">
@@ -131,7 +132,7 @@ export function SignupForm({ onToggleMode, onSuccess }: SignupFormProps) {
               required
             />
           </div>
-          <div className="flex justify-center">
+          {/* <div className="flex justify-center">
             <ReCaptcha
               ref={recaptchaRef}
               siteKey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"}
@@ -140,9 +141,10 @@ export function SignupForm({ onToggleMode, onSuccess }: SignupFormProps) {
               theme="light"
               size="normal"
             />
-          </div>
+          </div> */}
           {error && <div className="text-sm text-destructive bg-destructive/10 p-3 rounded-md">{error}</div>}
-          <Button type="submit" className="w-full" disabled={loading || !recaptchaToken}>
+          <Button type="submit" className="w-full" disabled={loading}>
+            {/* <Button type="submit" className="w-full" disabled={loading || !recaptchaToken}> */}
             {loading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />

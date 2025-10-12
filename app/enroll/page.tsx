@@ -1001,7 +1001,7 @@ export default function EnrollPage() {
                     {processing ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Redirecting to Razorpay...
+                        Redirecting to Cashfree...
                       </>
                     ) : !courseDataLoaded ? (
                       <>
@@ -1017,7 +1017,7 @@ export default function EnrollPage() {
                   </Button>
 
                   <p className="text-xs text-muted-foreground text-center mt-2">
-                    You will be redirected to Razorpay to securely complete your payment.
+                    You will be redirected to Cashfree to securely complete your payment.
                   </p>
                   <p className="text-xs text-muted-foreground text-center mt-1">
                     After payment, you'll be redirected to the dashboard. If you don't see your enrollment immediately, please refresh the page and log in again.
